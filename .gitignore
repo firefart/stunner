@@ -1,0 +1,7 @@
+stunner
+*.sh
+*.tar.gz
+release/
+dist/
+.env/
+env/
