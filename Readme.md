@@ -1,7 +1,9 @@
 # STUNNER
 
 Stunner is a tool to test and exploit STUN, TURN and TURN over TCP servers.
-TURN is a protocol mostly used in videoconferencing and audio chats (WebRTC) which can be abused to get a proxy into the internal network or dmz of a client if the server is misconfigured.
+TURN is a protocol mostly used in videoconferencing and audio chats (WebRTC).
+
+If you find a misconfigured server you can use this tool to open a local socks proxy that relays all traffic via the TURN protocol into the internal network behind the server.
 
 I developed this tool during a test of Cisco Expressway which resulted in some vulnerabilities: [https://firefart.at/post/post/multiple_vulnerabilities_cisco_expressway/](https://firefart.at/post/post/multiple_vulnerabilities_cisco_expressway/)
 
