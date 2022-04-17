@@ -36,9 +36,7 @@ func (opts SocksOpts) Validate() error {
 	if opts.Username == "" {
 		return fmt.Errorf("please supply a username")
 	}
-	if opts.Password == "" {
-		return fmt.Errorf("please supply a password")
-	}
+	//some STUN servers do not use passwords
 	if opts.Log == nil {
 		return fmt.Errorf("please supply a valid logger")
 	}
