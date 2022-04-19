@@ -328,7 +328,7 @@ func main() {
 					&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true, Usage: "username for the turn server"},
 					&cli.StringFlag{Name: "password", Aliases: []string{"p"}, Required: true, Usage: "password for the turn server"},
 					&cli.StringFlag{Name: "community-string", Value: "public", Usage: "SNMP community string to use for scanning"},
-					&cli.StringFlag{Name: "domain", Required: true, Usage: "DNS name to resolve on internal DNS servers (you need access to query logs for that domain)"},
+					&cli.StringFlag{Name: "domain", Required: true, Usage: "domain name to resolve on internal DNS servers during scanning"},
 					&cli.StringSliceFlag{Name: "ip", Usage: "Scan single IP instead of whole private range. If left empty all private ranges are scanned. Accepts single IPs or CIDR format."},
 				},
 				Before: func(ctx *cli.Context) error {
