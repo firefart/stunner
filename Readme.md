@@ -5,7 +5,7 @@ TURN is a protocol mostly used in videoconferencing and audio chats (WebRTC).
 
 If you find a misconfigured server you can use this tool to open a local socks proxy that relays all traffic via the TURN protocol into the internal network behind the server.
 
-I developed this tool during a test of Cisco Expressway which resulted in some vulnerabilities: [https://firefart.at/post/post/multiple_vulnerabilities_cisco_expressway/](https://firefart.at/post/post/multiple_vulnerabilities_cisco_expressway/)
+I developed this tool during a test of Cisco Expressway which resulted in some vulnerabilities: [https://firefart.at/post/multiple_vulnerabilities_cisco_expressway/](https://firefart.at/post/multiple_vulnerabilities_cisco_expressway/)
 
 To get the required username and password you need to fetch them using an out-of-band method like sniffing the Connect request from a web browser with Burp. I added an [example workflow](#example-workflow) at the bottom of the readme on how you would test such a server.
 
@@ -180,7 +180,7 @@ If it works you should see big loads of memory coming in, otherwise you will onl
 
 ## udp-scanner
 
-If a TURN server allows UDP connections to targets this scanner can be used to scan all private ip ranges and send them SNMP and DNS requests. As this checks a lot of IPs this can take multiple days to complete so use with caution or specify smaller targets via the parameters.
+If a TURN server allows UDP connections to targets this scanner can be used to scan all private ip ranges and send them SNMP and DNS requests. As this checks a lot of IPs this can take multiple days to complete so use with caution or specify smaller targets via the parameters. You need to supply a SNMP community string that will be tried and a domain name that will be resolved on each IP. For the domain name you can for example use burp collaborator.
 
 ### Options
 
