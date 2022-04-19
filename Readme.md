@@ -201,7 +201,7 @@ If a TURN server allows UDP connections to targets this scanner can be used to s
 ### Example
 
 ```bash
-./stunner udp-scanner -s x.x.x.x:3478 -u username -p password --ip 192.168.0.1/24 --ip 10.0.0.1/8
+./stunner udp-scanner -s x.x.x.x:3478 -u username -p password --ip 192.168.0.1/24 --ip 10.0.0.1/8  --domain domain.you.control.com --community-string public
 ```
 
 ## tcp-scanner
