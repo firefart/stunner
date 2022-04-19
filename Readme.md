@@ -193,7 +193,7 @@ If a TURN server allows UDP connections to targets this scanner can be used to s
 --username value, -u value    username for the turn server
 --password value, -p value    password for the turn server
 --community-string value      SNMP community string to use for scanning (default: "public")
---domain value                DNS name to resolve on internal DNS servers (you need access to query logs for that domain)
+--domain value                domain name to resolve on internal DNS servers during scanning
 --ip value                    Scan single IP instead of whole private range. If left empty all private ranges are scanned. Accepts single IPs or CIDR format.  (accepts multiple inputs)
 --help, -h                    show help (default: false)
 ```
