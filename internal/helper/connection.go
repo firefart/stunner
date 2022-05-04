@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var ErrTimeout = errors.New("timeout occurred")
+var ErrTimeout = errors.New("timeout occurred. you can try to increase the timeout if the server responds too slowly")
 
 // ConnectionRead reads all data from a connection
 func ConnectionRead(conn net.Conn, timeout time.Duration) ([]byte, error) {
