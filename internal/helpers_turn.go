@@ -76,7 +76,7 @@ func ConvertXORAddr(input []byte, transactionID string) (string, uint16, error) 
 		return "", 0, fmt.Errorf("invalid buffer length %d, need to be > 4", len(input))
 	}
 	family := input[0:2] // 0x0001 = ipv4, 0x0002 = ipv6
-	if bytes.Compare(family, []byte{00, 01}) != 0 && bytes.Compare(family, []byte{00, 02}) != 0 {
+	if !bytes.Equal(family, []byte{00, 01}) && !bytes.Equal(family, []byte{00, 02}) {
 		return "", 0, fmt.Errorf("invalid family %02x", family)
 	}
 	portRaw := input[2:4]
