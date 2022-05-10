@@ -27,7 +27,7 @@ TURN Extension for IPv6: [RFC 6156](https://datatracker.ietf.org/doc/html/rfc615
 
 ## info
 
-This command will print some info about the stun or turn server like the used software.
+This command will print some info about the stun or turn server like supported protocols and attributes like the used software.
 
 ### Options
 
@@ -35,7 +35,6 @@ This command will print some info about the stun or turn server like the used so
 --debug, -d                   enable debug output (default: false)
 --turnserver value, -s value  turn server to connect to in the format host:port
 --tls                         Use TLS for connecting (false in most tests) (default: false)
---protocol value              protocol to use when connecting to the TURN server. Supported values: tcp and udp (default: "udp")
 --timeout value               connect timeout to turn server (default: 1s)
 --help, -h                    show help (default: false)
 ```
@@ -43,11 +42,7 @@ This command will print some info about the stun or turn server like the used so
 ### Example
 
 ```bash
-./stunner info -s x.x.x.x:443 --protocol tcp
-```
-
-```bash
-./stunner info -s x.x.x.x:3478 --protocol udp
+./stunner info -s x.x.x.x:443
 ```
 
 ## range-scan
