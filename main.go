@@ -54,6 +54,7 @@ func main() {
 					&cli.BoolFlag{Name: "debug", Aliases: []string{"d"}, Value: false, Usage: "enable debug output"},
 					&cli.StringFlag{Name: "turnserver", Aliases: []string{"s"}, Required: true, Usage: "turn server to connect to in the format host:port"},
 					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS for connecting (false in most tests)"},
+					&cli.StringFlag{Name: "protocol", Value: "udp", Usage: "protocol to use when connecting to the TURN server. Supported values: tcp and udp"},
 					&cli.DurationFlag{Name: "timeout", Value: 1 * time.Second, Usage: "connect timeout to turn server"},
 				},
 				Before: func(ctx *cli.Context) error {
@@ -65,10 +66,12 @@ func main() {
 				Action: func(c *cli.Context) error {
 					turnServer := c.String("turnserver")
 					useTLS := c.Bool("tls")
+					protocol := c.String("protocol")
 					timeout := c.Duration("timeout")
 					return cmd.Info(cmd.InfoOpts{
 						TurnServer: turnServer,
 						UseTLS:     useTLS,
+						Protocol:   protocol,
 						Log:        log,
 						Timeout:    timeout,
 					})

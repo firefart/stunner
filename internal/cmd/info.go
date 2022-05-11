@@ -13,6 +13,7 @@ import (
 type InfoOpts struct {
 	TurnServer string
 	UseTLS     bool
+	Protocol   string
 	Timeout    time.Duration
 	Log        *logrus.Logger
 }
@@ -23,6 +24,9 @@ func (opts InfoOpts) Validate() error {
 	}
 	if !strings.Contains(opts.TurnServer, ":") {
 		return fmt.Errorf("turnserver needs a port")
+	}
+	if opts.Protocol != "tcp" && opts.Protocol != "udp" {
+		return fmt.Errorf("protocol needs to be either tcp or udp")
 	}
 	if opts.Log == nil {
 		return fmt.Errorf("please supply a valid logger")
@@ -64,7 +68,7 @@ func Info(opts InfoOpts) error {
 }
 
 func testStun(opts InfoOpts) ([]internal.Attribute, error) {
-	conn, err := internal.Connect("udp", opts.TurnServer, opts.UseTLS, opts.Timeout)
+	conn, err := internal.Connect(opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
 	if err != nil {
 		return nil, err
 	}
@@ -83,16 +87,7 @@ func testStun(opts InfoOpts) ([]internal.Attribute, error) {
 }
 
 func testTurn(opts InfoOpts, proto internal.RequestedTransport) ([]internal.Attribute, error) {
-	var protoString string
-	switch proto {
-	case internal.RequestedTransportTCP:
-		protoString = "tcp"
-	case internal.RequestedTransportUDP:
-		protoString = "udp"
-	default:
-		protoString = "udp"
-	}
-	conn, err := internal.Connect(protoString, opts.TurnServer, opts.UseTLS, opts.Timeout)
+	conn, err := internal.Connect(opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
 	if err != nil {
 		return nil, err
 	}
