@@ -28,3 +28,10 @@ lint-update:
 .PHONY: test
 test:
 	go test -race -cover ./...
+
+.PHONY: tag
+tag:
+	@[ "${TAG}" ] && echo "Tagging a new version ${TAG}" || ( echo "TAG is not set"; exit 1 )
+	git tag -a "${TAG}" -m "${TAG}"
+	git push origin "${TAG}"
+
