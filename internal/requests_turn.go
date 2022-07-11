@@ -25,8 +25,10 @@ func AllocateRequest(targetProtocol RequestedTransport, allocateProtcol Allocate
 
 	if allocateProtcol != AllocateProtocolIgnore {
 		s.Attributes = append(s.Attributes, Attribute{
-			Type:  AttrRequestedAddressFamily,
-			Value: []byte{byte(allocateProtcol), 0x00, 0x00, 0x00, 0x00}, // 1 byte to pad the single byte allocateProtocol to the needed 2 bytes and 3 reserved
+			Type: AttrRequestedAddressFamily,
+			// https://docs.microsoft.com/en-us/openspecs/office_protocols/ms-turn/e7efc457-9312-4a6b-8089-94032a599198
+			// manually add the reserved bytes
+			Value: []byte{byte(allocateProtcol), 0x00, 0x00, 0x00},
 		})
 	}
 
@@ -63,8 +65,10 @@ func AllocateRequestAuth(username, password, nonce, realm string, targetProtocol
 
 	if allocateProtcol != AllocateProtocolIgnore {
 		s.Attributes = append(s.Attributes, Attribute{
-			Type:  AttrRequestedAddressFamily,
-			Value: []byte{byte(allocateProtcol), 0x00, 0x00, 0x00, 0x00}, // 1 byte to pad the single byte allocateProtocol to the needed 2 bytes and 3 reserved bytes
+			Type: AttrRequestedAddressFamily,
+			// https://docs.microsoft.com/en-us/openspecs/office_protocols/ms-turn/e7efc457-9312-4a6b-8089-94032a599198
+			// manually add the reserved bytes
+			Value: []byte{byte(allocateProtcol), 0x00, 0x00, 0x00},
 		})
 	}
 
