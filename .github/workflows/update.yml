@@ -1,0 +1,45 @@
+name: Update
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 12 * * *"
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN_UPDATE }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "^1.18"
+
+      - name: update
+        run: |
+          make update
+
+      - name: setup git config
+        run: |
+          git config user.name "Github"
+          git config user.email "<>"
+
+      - name: commit changes
+        # need to override the default shell so we can check
+        # for error codes. Otherwise it will always fail if
+        # one command returns an error code other than 0
+        shell: bash --noprofile --norc -o pipefail {0}
+        run: |
+          git diff-index --quiet HEAD --
+          exit_status=$?
+          if [ $exit_status -eq 0 ]; then
+            echo "nothing has changed"
+          else
+            git add go.mod go.sum
+            git commit -m "auto update from github actions"
+            git push origin main
+          fi
