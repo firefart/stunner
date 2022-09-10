@@ -118,9 +118,11 @@ func main() {
 				},
 			},
 			{
-				Name:        "brute-password",
-				Usage:       "This command tries all passwords from a given file for a username via the TURN protocol.",
-				Description: "This command tries all passwords from a given file for a username via the TURN protocol (UDP).",
+				Name:  "brute-password",
+				Usage: "This command tries all passwords from a given file for a username via the TURN protocol.",
+				Description: "This command tries all passwords from a given file for a username via the TURN protocol (UDP)." +
+					"This can be useful when analysing a pcap where you can see the username but not the password." +
+					"Please note that an offline bruteforce is much more faster in this case.",
 				Flags: []cli.Flag{
 					&cli.BoolFlag{Name: "debug", Aliases: []string{"d"}, Value: false, Usage: "enable debug output"},
 					&cli.StringFlag{Name: "turnserver", Aliases: []string{"s"}, Required: true, Usage: "turn server to connect to in the format host:port"},
