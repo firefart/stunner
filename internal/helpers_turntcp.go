@@ -8,11 +8,12 @@ import (
 )
 
 // SetupTurnTCPConnection executes the following:
-//   Allocate Unauth (to get realm and nonce)
-//   Allocate Auth
-//	 Connect
-//   Opens Data Connection
-//   ConnectionBind
+//
+//	Allocate Unauth (to get realm and nonce)
+//	Allocate Auth
+//	Connect
+//	Opens Data Connection
+//	ConnectionBind
 //
 // it returns the controlConnection, the dataConnection and an error
 func SetupTurnTCPConnection(logger DebugLogger, turnServer string, useTLS bool, timeout time.Duration, targetHost netip.Addr, targetPort uint16, username, password string) (*net.TCPConn, *net.TCPConn, error) {

@@ -118,6 +118,45 @@ func main() {
 				},
 			},
 			{
+				Name:  "brute-password",
+				Usage: "This command tries all passwords from a given file for a username via the TURN protocol.",
+				Description: "This command tries all passwords from a given file for a username via the TURN protocol (UDP)." +
+					"This can be useful when analysing a pcap where you can see the username but not the password." +
+					"Please note that an offline bruteforce is much more faster in this case.",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "debug", Aliases: []string{"d"}, Value: false, Usage: "enable debug output"},
+					&cli.StringFlag{Name: "turnserver", Aliases: []string{"s"}, Required: true, Usage: "turn server to connect to in the format host:port"},
+					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS for connecting (false in most tests)"},
+					&cli.StringFlag{Name: "protocol", Value: "udp", Usage: "protocol to use when connecting to the TURN server. Supported values: tcp and udp"},
+					&cli.DurationFlag{Name: "timeout", Value: 1 * time.Second, Usage: "connect timeout to turn server"},
+					&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true, Usage: "username for the turn server"},
+					&cli.StringFlag{Name: "passfile", Aliases: []string{"p"}, Required: true, Usage: "passwordfile to use for bruteforce"},
+				},
+				Before: func(ctx *cli.Context) error {
+					if ctx.Bool("debug") {
+						log.SetLevel(logrus.DebugLevel)
+					}
+					return nil
+				},
+				Action: func(c *cli.Context) error {
+					turnServer := c.String("turnserver")
+					useTLS := c.Bool("tls")
+					protocol := c.String("protocol")
+					timeout := c.Duration("timeout")
+					username := c.String("username")
+					passwordFile := c.String("passfile")
+					return cmd.BruteForce(cmd.BruteforceOpts{
+						TurnServer: turnServer,
+						UseTLS:     useTLS,
+						Protocol:   protocol,
+						Log:        log,
+						Timeout:    timeout,
+						Username:   username,
+						Passfile:   passwordFile,
+					})
+				},
+			},
+			{
 				Name:  "memoryleak",
 				Usage: "This command exploits a memory information leak in some cisco software",
 				Description: "This command exploits a memory leak in a cisco software product." +

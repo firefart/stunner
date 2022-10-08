@@ -25,15 +25,16 @@ func xor(content, key []byte) []byte {
 }
 
 // xorAddr implements the XOR required for the STUN and TURN protocol
-//      0                   1                   2                   3
-//      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-//     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-//     |x x x x x x x x|    Family     |         X-Port                |
-//     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-//     |                X-Address (Variable)
-//     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //
-//             Figure 6: Format of XOR-MAPPED-ADDRESS Attribute
+//		0                   1                   2                   3
+//		0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+//		+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//		|x x x x x x x x|    Family     |         X-Port                |
+//		+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//		|                X-Address (Variable)
+//		+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//
+//	        Figure 6: Format of XOR-MAPPED-ADDRESS Attribute
 func xorAddr(ip netip.Addr, port uint16, transactionID []byte) ([]byte, error) {
 	var family uint16
 	var key []byte
@@ -102,9 +103,10 @@ func ConvertXORAddr(input []byte, transactionID string) (string, uint16, error) 
 }
 
 // SetupTurnConnection executes the following:
-//   Allocate Unauth (to get realm and nonce)
-//   Allocate Auth
-//	 CreatePermission
+//
+//	Allocate Unauth (to get realm and nonce)
+//	Allocate Auth
+//	CreatePermission
 //
 // it returns the connection, the realm, the nonce and an error
 func SetupTurnConnection(logger DebugLogger, connectProtocol string, turnServer string, useTLS bool, timeout time.Duration, targetHost netip.Addr, targetPort uint16, username, password string) (net.Conn, string, string, error) {
