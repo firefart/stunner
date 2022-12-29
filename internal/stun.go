@@ -22,6 +22,18 @@ func (s *Stun) GetErrorString() string {
 	for _, a := range s.Attributes {
 		if a.Type == AttrErrorCode {
 			attrError := ParseError(a.Value)
+			// update error text if server did not provide one
+			if len(strings.TrimSpace(attrError.ErrorText)) == 0 {
+				if tmp, ok := StunErrorNames[attrError.ErrorCode]; ok {
+					attrError.ErrorText = tmp
+				} else if tmp, ok := TurnErrorNames[attrError.ErrorCode]; ok {
+					attrError.ErrorText = tmp
+				} else if tmp, ok := TurnTCPErrorNames[attrError.ErrorCode]; ok {
+					attrError.ErrorText = tmp
+				} else {
+					attrError.ErrorText = "Invalid Error"
+				}
+			}
 			return fmt.Sprintf("Error %d: %s", attrError.ErrorCode, attrError.ErrorText)
 		}
 	}

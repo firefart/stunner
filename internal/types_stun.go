@@ -372,7 +372,7 @@ const (
 )
 
 // nolint:deadcode,varcheck,unused
-var errorNames = map[ErrorCode]string{
+var StunErrorNames = map[ErrorCode]string{
 	ErrorTryAlternate:               "Try Alternate",
 	ErrorBadRequest:                 "Bad Request",
 	ErrorUnauthorized:               "Unauthorized",
