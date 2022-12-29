@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/binary"
 	"fmt"
+	"strings"
 
 	"github.com/firefart/stunner/internal/helper"
 )
@@ -300,11 +301,22 @@ type Error struct {
 
 // ParseError returns an Error type from a byte slice
 func ParseError(buf []byte) Error {
-	errorCode := int(buf[2])*100 + int(buf[3])
-	errorText := buf[4:]
+	errorCode := ErrorCode(int(buf[2])*100 + int(buf[3]))
+	errorText := string(buf[4:])
+	if len(strings.TrimSpace(errorText)) == 0 {
+		if tmp, ok := errorNames[errorCode]; ok {
+			errorText = tmp
+		} else if tmp, ok := TurnErrorNames[errorCode]; ok {
+			errorText = tmp
+		} else if tmp, ok := TurnTCPErrorNames[errorCode]; ok {
+			errorText = tmp
+		} else {
+			errorText = "Invalid Error"
+		}
+	}
 	return Error{
-		ErrorCode: ErrorCode(errorCode),
-		ErrorText: string(errorText),
+		ErrorCode: errorCode,
+		ErrorText: errorText,
 	}
 }
 
