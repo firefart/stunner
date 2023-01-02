@@ -1,31 +1,56 @@
 package internal
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
 	"time"
 
 	"github.com/firefart/stunner/internal/helper"
+	"github.com/pion/dtls/v2"
 )
 
 func Connect(protocol string, turnServer string, useTLS bool, timeout time.Duration) (net.Conn, error) {
-	if useTLS {
+	if !useTLS {
+		// non TLS connection
+		conn, err := net.DialTimeout(protocol, turnServer, timeout)
+		if err != nil {
+			return nil, fmt.Errorf("error on establishing a connection to the server: %w", err)
+		}
+		return conn, nil
+	}
+
+	// if we reach here we have a TLS connection
+	switch protocol {
+	case "tcp":
 		d := net.Dialer{
 			Timeout: timeout,
 		}
-		conn, err := tls.DialWithDialer(&d, protocol, turnServer, &tls.Config{})
+		conn, err := tls.DialWithDialer(&d, protocol, turnServer, &tls.Config{
+			InsecureSkipVerify: true,
+		})
 		if err != nil {
 			return nil, fmt.Errorf("error on establishing a TLS connection to the server: %w", err)
 		}
 		return conn, nil
+	case "udp":
+		conn, err := net.DialTimeout(protocol, turnServer, timeout)
+		if err != nil {
+			return nil, fmt.Errorf("error on establishing a connection to the server: %w", err)
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+		dtlsConn, err := dtls.ClientWithContext(ctx, conn, &dtls.Config{
+			InsecureSkipVerify: true,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("error on establishing a DTLS connection to the server: %w", err)
+		}
+		return dtlsConn, nil
+	default:
+		return nil, fmt.Errorf("invalid protocol %s", protocol)
 	}
-	// non TLS connection
-	conn, err := net.DialTimeout(protocol, turnServer, timeout)
-	if err != nil {
-		return nil, fmt.Errorf("error on establishing a connection to the server: %w", err)
-	}
-	return conn, nil
 }
 
 // send serializes a STUN object and sends it on the provided connection
