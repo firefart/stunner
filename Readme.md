@@ -34,7 +34,7 @@ This command will print some info about the stun or turn server like supported p
 ```text
 --debug, -d                   enable debug output (default: false)
 --turnserver value, -s value  turn server to connect to in the format host:port
---tls                         Use TLS for connecting (false in most tests) (default: false)
+--tls                         Use TLS/DTLS on connecting to the STUN or TURN server
 --timeout value               connect timeout to turn server (default: 1s)
 --help, -h                    show help (default: false)
 ```
@@ -54,7 +54,7 @@ This command tries several private and restricted ranges to see if the TURN serv
 ```text
 --debug, -d                   enable debug output (default: false)
 --turnserver value, -s value  turn server to connect to in the format host:port
---tls                         Use TLS for connecting (false in most tests) (default: false)
+--tls                         Use TLS/DTLS on connecting to the STUN or TURN server
 --protocol value              protocol to use when connecting to the TURN server. Supported values: tcp and udp (default: "udp")
 --timeout value               connect timeout to turn server (default: 1s)
 --username value, -u value    username for the turn server
@@ -85,7 +85,7 @@ This is one of the most useful commands for TURN servers that support TCP connec
 ```text
 --debug, -d                   enable debug output (default: false)
 --turnserver value, -s value  turn server to connect to in the format host:port
---tls                         Use TLS for connecting (false in most tests) (default: false)
+--tls                         Use TLS/DTLS on connecting to the STUN or TURN server
 --protocol value              protocol to use when connecting to the TURN server. Supported values: tcp and udp (default: "udp")
 --timeout value               connect timeout to turn server (default: 1s)
 --username value, -u value    username for the turn server
@@ -122,7 +122,7 @@ This will most likely yield no useable information but can be useful to enumerat
 ```text
 --debug, -d                   enable debug output (default: false)
 --turnserver value, -s value  turn server to connect to in the format host:port
---tls                         Use TLS for connecting (false in most tests) (default: false)
+--tls                         Use TLS/DTLS on connecting to the STUN or TURN server
 --protocol value              protocol to use when connecting to the TURN server. Supported values: tcp and udp (default: "udp")
 --timeout value               connect timeout to turn server (default: 1s)
 --username value, -u value    username for the turn server
@@ -146,7 +146,7 @@ Please note that an offline bruteforce is much more faster in this case.
 ```text
 --debug, -d                   enable debug output (default: false)
 --turnserver value, -s value  turn server to connect to in the format host:port
---tls                         Use TLS for connecting (false in most tests) (default: false)
+--tls                         Use TLS/DTLS on connecting to the STUN or TURN server
 --protocol value              protocol to use when connecting to the TURN server. Supported values: tcp and udp (default: "udp")
 --timeout value               connect timeout to turn server (default: 1s)
 --username value, -u value    username for the turn server
@@ -170,7 +170,7 @@ The server takes the data to send to `target` (must be a high port > 1024 in mos
 ```text
 --debug, -d                   enable debug output (default: false)
 --turnserver value, -s value  turn server to connect to in the format host:port
---tls                         Use TLS for connecting (false in most tests) (default: false)
+--tls                         Use TLS/DTLS on connecting to the STUN or TURN server
 --protocol value              protocol to use when connecting to the TURN server. Supported values: tcp and udp (default: "udp")
 --timeout value               connect timeout to turn server (default: 1s)
 --username value, -u value    username for the turn server
@@ -206,7 +206,7 @@ If a TURN server allows UDP connections to targets this scanner can be used to s
 ```text
 --debug, -d                   enable debug output (default: false)
 --turnserver value, -s value  turn server to connect to in the format host:port
---tls                         Use TLS for connecting (false in most tests) (default: false)
+--tls                         Use TLS/DTLS on connecting to the STUN or TURN server
 --protocol value              protocol to use when connecting to the TURN server. Supported values: tcp and udp (default: "udp")
 --timeout value               connect timeout to turn server (default: 1s)
 --username value, -u value    username for the turn server
@@ -232,7 +232,7 @@ Same as `udp-scanner` but sends out HTTP requests to the specified ports (HTTPS 
 ```text
 --debug, -d                   enable debug output (default: false)
 --turnserver value, -s value  turn server to connect to in the format host:port
---tls                         Use TLS for connecting (false in most tests) (default: false)
+--tls                         Use TLS/DTLS on connecting to the STUN or TURN server
 --protocol value              protocol to use when connecting to the TURN server. Supported values: tcp and udp (default: "udp")
 --timeout value               connect timeout to turn server (default: 1s)
 --username value, -u value    username for the turn server

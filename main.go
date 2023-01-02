@@ -53,7 +53,7 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{Name: "debug", Aliases: []string{"d"}, Value: false, Usage: "enable debug output"},
 					&cli.StringFlag{Name: "turnserver", Aliases: []string{"s"}, Required: true, Usage: "turn server to connect to in the format host:port"},
-					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS for connecting (false in most tests)"},
+					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS/DTLS on connecting to the STUN or TURN server"},
 					&cli.StringFlag{Name: "protocol", Value: "udp", Usage: "protocol to use when connecting to the TURN server. Supported values: tcp and udp"},
 					&cli.DurationFlag{Name: "timeout", Value: 1 * time.Second, Usage: "connect timeout to turn server"},
 				},
@@ -87,7 +87,7 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{Name: "debug", Aliases: []string{"d"}, Value: false, Usage: "enable debug output"},
 					&cli.StringFlag{Name: "turnserver", Aliases: []string{"s"}, Required: true, Usage: "turn server to connect to in the format host:port"},
-					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS for connecting (false in most tests)"},
+					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS/DTLS on connecting to the STUN or TURN server"},
 					&cli.StringFlag{Name: "protocol", Value: "udp", Usage: "protocol to use when connecting to the TURN server. Supported values: tcp and udp"},
 					&cli.DurationFlag{Name: "timeout", Value: 1 * time.Second, Usage: "connect timeout to turn server"},
 					&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true, Usage: "username for the turn server"},
@@ -126,7 +126,7 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{Name: "debug", Aliases: []string{"d"}, Value: false, Usage: "enable debug output"},
 					&cli.StringFlag{Name: "turnserver", Aliases: []string{"s"}, Required: true, Usage: "turn server to connect to in the format host:port"},
-					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS for connecting (false in most tests)"},
+					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS/DTLS on connecting to the STUN or TURN server"},
 					&cli.StringFlag{Name: "protocol", Value: "udp", Usage: "protocol to use when connecting to the TURN server. Supported values: tcp and udp"},
 					&cli.DurationFlag{Name: "timeout", Value: 1 * time.Second, Usage: "connect timeout to turn server"},
 					&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true, Usage: "username for the turn server"},
@@ -169,7 +169,7 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{Name: "debug", Aliases: []string{"d"}, Value: false, Usage: "enable debug output"},
 					&cli.StringFlag{Name: "turnserver", Aliases: []string{"s"}, Required: true, Usage: "turn server to connect to in the format host:port"},
-					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS for connecting (false in most tests)"},
+					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS/DTLS on connecting to the STUN or TURN server"},
 					&cli.StringFlag{Name: "protocol", Value: "udp", Usage: "protocol to use when connecting to the TURN server. Supported values: tcp and udp"},
 					&cli.DurationFlag{Name: "timeout", Value: 1 * time.Second, Usage: "connect timeout to turn server"},
 					&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true, Usage: "username for the turn server"},
@@ -232,7 +232,7 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{Name: "debug", Aliases: []string{"d"}, Value: false, Usage: "enable debug output"},
 					&cli.StringFlag{Name: "turnserver", Aliases: []string{"s"}, Required: true, Usage: "turn server to connect to in the format host:port"},
-					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS for connecting (false in most tests)"},
+					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS/DTLS on connecting to the STUN or TURN server"},
 					&cli.StringFlag{Name: "protocol", Value: "udp", Usage: "protocol to use when connecting to the TURN server. Supported values: tcp and udp"},
 					&cli.DurationFlag{Name: "timeout", Value: 1 * time.Second, Usage: "connect timeout to turn server"},
 					&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true, Usage: "username for the turn server"},
@@ -270,7 +270,7 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{Name: "debug", Aliases: []string{"d"}, Value: false, Usage: "enable debug output"},
 					&cli.StringFlag{Name: "turnserver", Aliases: []string{"s"}, Required: true, Usage: "turn server to connect to in the format host:port"},
-					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS for connecting (false in most tests)"},
+					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS/DTLS on connecting to the STUN or TURN server"},
 					&cli.StringFlag{Name: "protocol", Value: "udp", Usage: "protocol to use when connecting to the TURN server. Supported values: tcp and udp"},
 					&cli.DurationFlag{Name: "timeout", Value: 1 * time.Second, Usage: "connect timeout to turn server"},
 					&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true, Usage: "username for the turn server"},
@@ -313,7 +313,7 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{Name: "debug", Aliases: []string{"d"}, Value: false, Usage: "enable debug output"},
 					&cli.StringFlag{Name: "turnserver", Aliases: []string{"s"}, Required: true, Usage: "turn server to connect to in the format host:port"},
-					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS for connecting (false in most tests)"},
+					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS/DTLS on connecting to the STUN or TURN server"},
 					&cli.StringFlag{Name: "protocol", Value: "udp", Usage: "protocol to use when connecting to the TURN server. Supported values: tcp and udp"},
 					&cli.DurationFlag{Name: "timeout", Value: 1 * time.Second, Usage: "connect timeout to turn server"},
 					&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true, Usage: "username for the turn server"},
@@ -361,7 +361,7 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{Name: "debug", Aliases: []string{"d"}, Value: false, Usage: "enable debug output"},
 					&cli.StringFlag{Name: "turnserver", Aliases: []string{"s"}, Required: true, Usage: "turn server to connect to in the format host:port"},
-					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS for connecting (false in most tests)"},
+					&cli.BoolFlag{Name: "tls", Value: false, Usage: "Use TLS/DTLS on connecting to the STUN or TURN server"},
 					&cli.StringFlag{Name: "protocol", Value: "udp", Usage: "protocol to use when connecting to the TURN server. Supported values: tcp and udp"},
 					&cli.DurationFlag{Name: "timeout", Value: 1 * time.Second, Usage: "connect timeout to turn server"},
 					&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true, Usage: "username for the turn server"},
