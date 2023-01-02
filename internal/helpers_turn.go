@@ -72,6 +72,24 @@ func xorAddr(ip netip.Addr, port uint16, transactionID []byte) ([]byte, error) {
 	return buf, nil
 }
 
+func ParseMappedAdress(input []byte) (*netip.Addr, uint16, error) {
+	if len(input) < 5 {
+		return nil, 0, fmt.Errorf("invalid buffer length %d, need to be > 4", len(input))
+	}
+	family := input[0:2] // 0x0001 = ipv4, 0x0002 = ipv6
+	if !bytes.Equal(family, []byte{00, 01}) && !bytes.Equal(family, []byte{00, 02}) {
+		return nil, 0, fmt.Errorf("invalid family %02x", family)
+	}
+	portRaw := input[2:4]
+	payload := input[4:]
+	portInt := binary.BigEndian.Uint16(portRaw)
+	ip, ok := netip.AddrFromSlice(payload)
+	if !ok {
+		return nil, 0, fmt.Errorf("invalid IP %02x", payload)
+	}
+	return &ip, portInt, nil
+}
+
 func ConvertXORAddr(input []byte, transactionID string) (string, uint16, error) {
 	if len(input) < 5 {
 		return "", 0, fmt.Errorf("invalid buffer length %d, need to be > 4", len(input))

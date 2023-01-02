@@ -265,6 +265,13 @@ const (
 	AttrAlternateServer AttributeType = 0x8023
 	// AttrFingerprint https://tools.ietf.org/html/rfc5389#section-15.5
 	AttrFingerprint AttributeType = 0x8028
+
+	// old RFC5780 https://www.rfc-editor.org/rfc/rfc5780#section-7
+	AttrChangeRequest  AttributeType = 0x0003
+	AttrPadding        AttributeType = 0x0026
+	AttrResponsePort   AttributeType = 0x0027
+	AttrResponseOrigin AttributeType = 0x802b
+	AttrOtherAddress   AttributeType = 0x802c
 )
 
 var attrNames = map[AttributeType]string{
@@ -280,6 +287,11 @@ var attrNames = map[AttributeType]string{
 	AttrSoftware:               "SOFTWARE",
 	AttrAlternateServer:        "ALTERNATE-SERVER",
 	AttrFingerprint:            "FINGERPRINT",
+	AttrChangeRequest:          "CHANGE-REQUEST",
+	AttrPadding:                "PADDING",
+	AttrResponsePort:           "RESPONSE-PORT",
+	AttrResponseOrigin:         "RESPONSE-ORIGIN",
+	AttrOtherAddress:           "OTHER-ADDRESS",
 }
 
 /*

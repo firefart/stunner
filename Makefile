@@ -35,3 +35,8 @@ tag:
 	git tag -a "${TAG}" -m "${TAG}"
 	git push origin "${TAG}"
 
+.PHONY: windows
+windows:
+	GOOS=windows GOARCH=amd64 go fmt ./...
+	GOOS=windows GOARCH=amd64 go vet ./...
+	GOOS=windows GOARCH=amd64 go build

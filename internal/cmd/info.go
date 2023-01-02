@@ -124,8 +124,18 @@ func printAttributes(opts InfoOpts, attr []internal.Attribute) {
 			headerPrinted = true
 		}
 
-		humanName := internal.AttributeTypeString(a.Type)
 		value := string(a.Value)
+		// checks for old RFC5780 but still implemented (for example in coturn)
+		if a.Type == internal.AttrResponseOrigin || a.Type == internal.AttrOtherAddress {
+			tmpIP, tmpPort, err := internal.ParseMappedAdress(a.Value)
+			if err != nil {
+				opts.Log.Errorf("could not parse mapped address: %02x %v", a.Value, err)
+				continue
+			}
+			value = fmt.Sprintf("%s:%d", tmpIP.String(), tmpPort)
+		}
+
+		humanName := internal.AttributeTypeString(a.Type)
 		if humanName == "" {
 			if helper.IsPrintable(value) {
 				opts.Log.Warnf("\tNon Standard Attribute %d returned with value %s", uint16(a.Type), value)
