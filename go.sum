@@ -3,8 +3,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46t
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/firefart/gosocks v0.0.0-20220509205115-be1ab07f31f5 h1:N6nO8CPiWhkCubW+tJBKTVouhZ9hqnXi6zuMj+dnTPg=
-github.com/firefart/gosocks v0.0.0-20220509205115-be1ab07f31f5/go.mod h1:nJNHO+0hy3xLB7JbTiIu6X6wvN0gKK6hV/YWIppFzp4=
+github.com/firefart/gosocks v0.0.0-20230126105954-c468788d91d2 h1:j4K4mKXTbR1DXi+wWqiNJhxqjs0nhQpry1G40JCRygU=
+github.com/firefart/gosocks v0.0.0-20230126105954-c468788d91d2/go.mod h1:nJNHO+0hy3xLB7JbTiIu6X6wvN0gKK6hV/YWIppFzp4=
 github.com/pion/dtls/v2 v2.1.5 h1:jlh2vtIyUBShchoTDqpCCqiYCyRFJ/lvf/gQ8TALs+c=
 github.com/pion/dtls/v2 v2.1.5/go.mod h1:BqCE7xPZbPSubGasRoDFJeTsyJtdD1FanJYL0JGheqY=
 github.com/pion/logging v0.2.2 h1:M9+AIj/+pxNsDfAT64+MAVgJO0rsyLnoJKCqf//DoeY=
