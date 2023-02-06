@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	fingerprint = 0x5354554e
+	fingerprint = 0x5354554e // nolint:deadcode,unused
 )
 
 // Align the uint16 number to the smallest multiple of 4, which is larger than
