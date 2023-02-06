@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/firefart/gosocks v0.2.0
-	github.com/pion/dtls/v2 v2.2.3
+	github.com/pion/dtls/v2 v2.2.4
 	github.com/sirupsen/logrus v1.9.0
 	github.com/urfave/cli/v2 v2.24.3
 )
