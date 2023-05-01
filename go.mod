@@ -6,7 +6,7 @@ require (
 	github.com/firefart/gosocks v0.2.0
 	github.com/pion/dtls/v2 v2.2.6
 	github.com/sirupsen/logrus v1.9.0
-	github.com/urfave/cli/v2 v2.25.1
+	github.com/urfave/cli/v2 v2.25.2
 )
 
 require (
