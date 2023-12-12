@@ -29,7 +29,7 @@ type SocksTurnTCPHandler struct {
 }
 
 // PreHandler connects to the STUN server, sets the connection up and returns the data connections
-func (s *SocksTurnTCPHandler) PreHandler(request socks.Request) (io.ReadWriteCloser, *socks.Error) {
+func (s *SocksTurnTCPHandler) Init(request socks.Request) (io.ReadWriteCloser, *socks.Error) {
 	var target netip.Addr
 	var err error
 	switch request.AddressType {
@@ -40,14 +40,20 @@ func (s *SocksTurnTCPHandler) PreHandler(request socks.Request) (io.ReadWriteClo
 		}
 		target = tmp
 	case socks.RequestAddressTypeDomainname:
-		names, err := helper.ResolveName(s.Ctx, string(request.DestinationAddress))
-		if err != nil {
-			return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: err}
+		// check if the input is an ip adress
+		if ip, err := netip.ParseAddr(string(request.DestinationAddress)); err == nil {
+			target = ip
+		} else {
+			// input is a hostname
+			names, err := helper.ResolveName(s.Ctx, string(request.DestinationAddress))
+			if err != nil {
+				return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: err}
+			}
+			if len(names) == 0 {
+				return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: fmt.Errorf("%s could not be resolved", string(request.DestinationAddress))}
+			}
+			target = names[0]
 		}
-		if len(names) == 0 {
-			return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: fmt.Errorf("%s could not be resolved", string(request.DestinationAddress))}
-		}
-		target = names[0]
 	default:
 		return nil, &socks.Error{Reason: socks.RequestReplyAddressTypeNotSupported, Err: fmt.Errorf("AddressType %#x not implemented", request.AddressType)}
 	}
@@ -101,9 +107,9 @@ func (s *SocksTurnTCPHandler) Refresh(ctx context.Context) {
 	}
 }
 
-// CopyFromRemoteToClient is used to copy data
-func (s *SocksTurnTCPHandler) CopyFromRemoteToClient(ctx context.Context, remote io.ReadCloser, client io.WriteCloser) error {
-	i, err := io.Copy(client, remote)
+// ReadFromClient is used to copy data
+func (s *SocksTurnTCPHandler) ReadFromClient(ctx context.Context, client io.ReadCloser, remote io.WriteCloser) error {
+	i, err := io.Copy(remote, client)
 	if err != nil {
 		return fmt.Errorf("CopyFromRemoteToClient: %w", err)
 	}
@@ -111,9 +117,9 @@ func (s *SocksTurnTCPHandler) CopyFromRemoteToClient(ctx context.Context, remote
 	return nil
 }
 
-// CopyFromClientToRemote is used to copy data
-func (s *SocksTurnTCPHandler) CopyFromClientToRemote(ctx context.Context, client io.ReadCloser, remote io.WriteCloser) error {
-	i, err := io.Copy(remote, client)
+// ReadFromRemote is used to copy data
+func (s *SocksTurnTCPHandler) ReadFromRemote(ctx context.Context, remote io.ReadCloser, client io.WriteCloser) error {
+	i, err := io.Copy(client, remote)
 	if err != nil {
 		return fmt.Errorf("CopyFromClientToRemote: %w", err)
 	}
@@ -122,7 +128,7 @@ func (s *SocksTurnTCPHandler) CopyFromClientToRemote(ctx context.Context, client
 }
 
 // Cleanup closes the stored control connection
-func (s *SocksTurnTCPHandler) Cleanup() error {
+func (s *SocksTurnTCPHandler) Close() error {
 	if s.ControlConnection != nil {
 		return s.ControlConnection.Close()
 	}
