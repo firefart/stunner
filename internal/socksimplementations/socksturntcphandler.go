@@ -36,7 +36,7 @@ func (s *SocksTurnTCPHandler) Init(request socks.Request) (io.ReadWriteCloser, *
 	case socks.RequestAddressTypeIPv4, socks.RequestAddressTypeIPv6:
 		tmp, ok := netip.AddrFromSlice(request.DestinationAddress)
 		if !ok {
-			return nil, &socks.Error{Reason: socks.RequestReplyAddressTypeNotSupported, Err: fmt.Errorf("%02x is no ip address", request.DestinationAddress)}
+			return nil, socks.NewError(socks.RequestReplyAddressTypeNotSupported, fmt.Errorf("%02x is no ip address", request.DestinationAddress))
 		}
 		target = tmp
 	case socks.RequestAddressTypeDomainname:
@@ -47,25 +47,25 @@ func (s *SocksTurnTCPHandler) Init(request socks.Request) (io.ReadWriteCloser, *
 			// input is a hostname
 			names, err := helper.ResolveName(s.Ctx, string(request.DestinationAddress))
 			if err != nil {
-				return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: err}
+				return nil, socks.NewError(socks.RequestReplyHostUnreachable, err)
 			}
 			if len(names) == 0 {
-				return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: fmt.Errorf("%s could not be resolved", string(request.DestinationAddress))}
+				return nil, socks.NewError(socks.RequestReplyHostUnreachable, fmt.Errorf("%s could not be resolved", string(request.DestinationAddress)))
 			}
 			target = names[0]
 		}
 	default:
-		return nil, &socks.Error{Reason: socks.RequestReplyAddressTypeNotSupported, Err: fmt.Errorf("AddressType %#x not implemented", request.AddressType)}
+		return nil, socks.NewError(socks.RequestReplyAddressTypeNotSupported, fmt.Errorf("AddressType %#x not implemented", request.AddressType))
 	}
 
 	if s.DropNonPrivateRequests && !helper.IsPrivateIP(target) {
 		s.Log.Debugf("dropping non private connection to %s:%d", target.String(), request.DestinationPort)
-		return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: fmt.Errorf("dropping non private connection to %s:%d", target.String(), request.DestinationPort)}
+		return nil, socks.NewError(socks.RequestReplyHostUnreachable, fmt.Errorf("dropping non private connection to %s:%d", target.String(), request.DestinationPort))
 	}
 
 	controlConnection, dataConnection, err := internal.SetupTurnTCPConnection(s.Log, s.Server, s.UseTLS, s.Timeout, target, request.DestinationPort, s.TURNUsername, s.TURNPassword)
 	if err != nil {
-		return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: err}
+		return nil, socks.NewError(socks.RequestReplyHostUnreachable, err)
 	}
 
 	// we need to keep this connection open

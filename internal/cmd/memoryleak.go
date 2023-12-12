@@ -67,7 +67,10 @@ func MemoryLeak(opts MemoryleakOpts) error {
 	}
 	defer remote.Close()
 
-	channelNumber := helper.RandomChannelNumber()
+	channelNumber, err := helper.RandomChannelNumber()
+	if err != nil {
+		return fmt.Errorf("error on getting random channel number: %w", err)
+	}
 	channelBindRequest, err := internal.ChannelBindRequest(opts.Username, opts.Password, nonce, realm, opts.TargetHost, opts.TargetPort, channelNumber)
 	if err != nil {
 		return fmt.Errorf("error on generating ChannelBind request: %w", err)

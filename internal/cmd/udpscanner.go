@@ -96,7 +96,10 @@ func snmpScan(opts UDPScannerOpts, ip netip.Addr, port uint16, community string)
 	}
 	defer remote.Close()
 
-	channelNumber := helper.RandomChannelNumber()
+	channelNumber, err := helper.RandomChannelNumber()
+	if err != nil {
+		return fmt.Errorf("error on getting random channel number: %w", err)
+	}
 	channelBindRequest, err := internal.ChannelBindRequest(opts.Username, opts.Password, nonce, realm, ip, port, channelNumber)
 	if err != nil {
 		return fmt.Errorf("error on generating ChannelBindRequest: %w", err)
@@ -180,7 +183,10 @@ func dnsScan(opts UDPScannerOpts, ip netip.Addr, port uint16, dnsName string) er
 	}
 	defer remote.Close()
 
-	channelNumber := helper.RandomChannelNumber()
+	channelNumber, err := helper.RandomChannelNumber()
+	if err != nil {
+		return fmt.Errorf("error on getting random channel number: %w", err)
+	}
 	channelBindRequest, err := internal.ChannelBindRequest(opts.Username, opts.Password, nonce, realm, ip, port, channelNumber)
 	if err != nil {
 		return fmt.Errorf("error on generating ChannelBindRequest: %w", err)

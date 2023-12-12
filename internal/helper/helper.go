@@ -1,6 +1,7 @@
 package helper
 
 import (
+	cryptorand "crypto/rand"
 	"encoding/binary"
 	"math/rand"
 	"net/netip"
@@ -45,17 +46,19 @@ func IsPrivateIP(ip netip.Addr) bool {
 // RandomChannelNumber generates a random valid channel number
 // 0x4000 through 0x7FFF: These values are the allowed channel
 // numbers (16,383 possible values).
-func RandomChannelNumber() []byte {
+func RandomChannelNumber() ([]byte, error) {
 	token := make([]byte, 2)
 	valid := false
 	for !valid {
-		rand.Read(token)
+		if _, err := cryptorand.Read(token); err != nil {
+			return nil, err
+		}
 		if token[0] >= 0x40 &&
 			token[0] <= 0x7f {
 			break
 		}
 	}
-	return token
+	return token, nil
 }
 
 // PutUint16 is a helper function to convert an uint16 to a buffer

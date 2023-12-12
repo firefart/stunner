@@ -37,46 +37,49 @@ func (s *SocksTurnUDPHandler) PreHandler(request socks.Request) (io.ReadWriteClo
 	case socks.RequestAddressTypeIPv4, socks.RequestAddressTypeIPv6:
 		tmp, ok := netip.AddrFromSlice(request.DestinationAddress)
 		if !ok {
-			return nil, &socks.Error{Reason: socks.RequestReplyAddressTypeNotSupported, Err: fmt.Errorf("%02x is no ip address", request.DestinationAddress)}
+			return nil, socks.NewError(socks.RequestReplyAddressTypeNotSupported, fmt.Errorf("%02x is no ip address", request.DestinationAddress))
 		}
 		target = tmp
 	case socks.RequestAddressTypeDomainname:
 		names, err := helper.ResolveName(s.Ctx, string(request.DestinationAddress))
 		if err != nil {
-			return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: err}
+			return nil, socks.NewError(socks.RequestReplyHostUnreachable, err)
 		}
 		if len(names) == 0 {
-			return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: fmt.Errorf("%s could not be resolved", string(request.DestinationAddress))}
+			return nil, socks.NewError(socks.RequestReplyHostUnreachable, fmt.Errorf("%s could not be resolved", string(request.DestinationAddress)))
 		}
 		target = names[0]
 	default:
-		return nil, &socks.Error{Reason: socks.RequestReplyAddressTypeNotSupported, Err: fmt.Errorf("AddressType %#x not implemented", request.AddressType)}
+		return nil, socks.NewError(socks.RequestReplyAddressTypeNotSupported, fmt.Errorf("AddressType %#x not implemented", request.AddressType))
 	}
 
 	if s.DropNonPrivateRequests && !helper.IsPrivateIP(target) {
 		s.Log.Debugf("dropping non private connection to %s:%d", target.String(), request.DestinationPort)
-		return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: fmt.Errorf("dropping non private connection to %s:%d", target.String(), request.DestinationPort)}
+		return nil, socks.NewError(socks.RequestReplyHostUnreachable, fmt.Errorf("dropping non private connection to %s:%d", target.String(), request.DestinationPort))
 	}
 
 	remote, realm, nonce, err := internal.SetupTurnConnection(s.Log, s.ConnectProtocol, s.Server, s.UseTLS, s.Timeout, target, request.DestinationPort, s.TURNUsername, s.TURNPassword)
 	if err != nil {
-		return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: err}
+		return nil, socks.NewError(socks.RequestReplyHostUnreachable, err)
 	}
 	defer remote.Close()
 
-	s.channelNumber = helper.RandomChannelNumber()
+	s.channelNumber, err = helper.RandomChannelNumber()
+	if err != nil {
+		return nil, socks.NewError(socks.RequestReplyGeneralFailure, fmt.Errorf("error on getting random channel number: %w", err))
+	}
 	channelBindRequest, err := internal.ChannelBindRequest(s.TURNUsername, s.TURNPassword, nonce, realm, target, request.DestinationPort, s.channelNumber)
 	if err != nil {
-		return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: fmt.Errorf("error on generating ChannelBindRequest: %w", err)}
+		return nil, socks.NewError(socks.RequestReplyHostUnreachable, fmt.Errorf("error on generating ChannelBindRequest: %w", err))
 	}
 	s.Log.Debugf("ChannelBind Request:\n%s", channelBindRequest.String())
 	channelBindResponse, err := channelBindRequest.SendAndReceive(s.Log, remote, s.Timeout)
 	if err != nil {
-		return nil, &socks.Error{Reason: socks.RequestReplyHostUnreachable, Err: fmt.Errorf("error on sending ChannelBindRequest: %w", err)}
+		return nil, socks.NewError(socks.RequestReplyHostUnreachable, fmt.Errorf("error on sending ChannelBindRequest: %w", err))
 	}
 	s.Log.Debugf("ChannelBind Response:\n%s", channelBindResponse.String())
 	if channelBindResponse.Header.MessageType.Class == internal.MsgTypeClassError {
-		return nil, &socks.Error{Reason: socks.RequestReplyGeneralFailure, Err: fmt.Errorf("error on ChannelBind: %s", channelBindResponse.GetErrorString())}
+		return nil, socks.NewError(socks.RequestReplyGeneralFailure, fmt.Errorf("error on ChannelBind: %s", channelBindResponse.GetErrorString()))
 	}
 	return remote, nil
 }

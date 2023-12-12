@@ -4,7 +4,10 @@ import "testing"
 
 func TestRandomChannelNumber(t *testing.T) {
 	for i := 0; i < 1000; i++ {
-		channel := RandomChannelNumber()
+		channel, err := RandomChannelNumber()
+		if err != nil {
+			t.Fatal(err)
+		}
 		if channel[0] < 0x40 || channel[0] > 0x7F {
 			t.Fail()
 		}

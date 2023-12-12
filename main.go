@@ -14,7 +14,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"net"
 	"net/netip"
 	"os"
@@ -32,8 +31,6 @@ func main() {
 	log := logrus.New()
 	log.SetOutput(os.Stdout)
 	log.SetLevel(logrus.InfoLevel)
-
-	rand.Seed(time.Now().UnixNano())
 
 	app := &cli.App{
 		Name:  "stunner",
