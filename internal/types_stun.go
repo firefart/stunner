@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 
@@ -316,7 +317,7 @@ func ParseError(buf []byte) Error {
 	errorText := buf[4:]
 	return Error{
 		ErrorCode: ErrorCode(errorCode),
-		ErrorText: string(errorText),
+		ErrorText: string(bytes.Trim(errorText, "\x00")),
 	}
 }
 
