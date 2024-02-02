@@ -2,6 +2,7 @@ stunner
 *.sh
 *.txt
 *.tar.gz
+*.exe
 release/
 dist/
 .env/

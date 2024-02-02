@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net"
 	"net/netip"
@@ -16,19 +17,24 @@ import (
 //	ConnectionBind
 //
 // it returns the controlConnection, the dataConnection and an error
-func SetupTurnTCPConnection(logger DebugLogger, turnServer string, useTLS bool, timeout time.Duration, targetHost netip.Addr, targetPort uint16, username, password string) (*net.TCPConn, *net.TCPConn, error) {
+func SetupTurnTCPConnection(logger DebugLogger, turnServer string, useTLS bool, timeout time.Duration, targetHost netip.Addr, targetPort uint16, username, password string) (net.Conn, net.Conn, error) {
 	// protocol needs to be tcp
 	controlConnectionRaw, err := Connect("tcp", turnServer, useTLS, timeout)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error on establishing control connection: %w", err)
 	}
 
-	controlConnection, ok := controlConnectionRaw.(*net.TCPConn)
-	if !ok {
-		return nil, nil, fmt.Errorf("could not cast control connection to TCPConn")
-	}
-	if err := controlConnection.SetKeepAlive(true); err != nil {
-		return nil, nil, fmt.Errorf("could not set KeepAlive on control connection: %w", err)
+	var controlConnection net.Conn
+	switch t := controlConnectionRaw.(type) {
+	case *net.TCPConn:
+		if err := t.SetKeepAlive(true); err != nil {
+			return nil, nil, fmt.Errorf("could not set KeepAlive on control connection: %w", err)
+		}
+		controlConnection = t
+	case *tls.Conn:
+		controlConnection = t
+	default:
+		return nil, nil, fmt.Errorf("could not determine control connection type (%T)", t)
 	}
 
 	logger.Debugf("opened turn tcp control connection from %s to %s", controlConnection.LocalAddr().String(), controlConnection.RemoteAddr().String())
@@ -78,12 +84,17 @@ func SetupTurnTCPConnection(logger DebugLogger, turnServer string, useTLS bool, 
 		return nil, nil, fmt.Errorf("error on establishing data connection: %w", err)
 	}
 
-	dataConnection, ok := dataConnectionRaw.(*net.TCPConn)
-	if !ok {
-		return nil, nil, fmt.Errorf("could not cast data connection to TCPConn")
-	}
-	if err := dataConnection.SetKeepAlive(true); err != nil {
-		return nil, nil, fmt.Errorf("could not set KeepAlive on data connection: %w", err)
+	var dataConnection net.Conn
+	switch t := dataConnectionRaw.(type) {
+	case *net.TCPConn:
+		if err := t.SetKeepAlive(true); err != nil {
+			return nil, nil, fmt.Errorf("could not set KeepAlive on data connection: %w", err)
+		}
+		dataConnection = t
+	case *tls.Conn:
+		dataConnection = t
+	default:
+		return nil, nil, fmt.Errorf("could not determine data connection type (%T)", t)
 	}
 
 	logger.Debugf("opened turn tcp data connection from %s to %s", dataConnection.LocalAddr().String(), dataConnection.RemoteAddr().String())
