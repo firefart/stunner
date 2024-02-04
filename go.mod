@@ -3,7 +3,7 @@ module github.com/firefart/stunner
 go 1.21
 
 require (
-	github.com/firefart/gosocks v0.3.0
+	github.com/firefart/gosocks v0.4.1
 	github.com/pion/dtls/v2 v2.2.10
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.1
