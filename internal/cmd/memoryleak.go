@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"net/netip"
 	"strings"
@@ -56,12 +57,12 @@ func (opts MemoryleakOpts) Validate() error {
 	return nil
 }
 
-func MemoryLeak(opts MemoryleakOpts) error {
+func MemoryLeak(ctx context.Context, opts MemoryleakOpts) error {
 	if err := opts.Validate(); err != nil {
 		return err
 	}
 
-	remote, realm, nonce, err := internal.SetupTurnConnection(opts.Log, opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout, opts.TargetHost, opts.TargetPort, opts.Username, opts.Password)
+	remote, realm, nonce, err := internal.SetupTurnConnection(ctx, opts.Log, opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout, opts.TargetHost, opts.TargetPort, opts.Username, opts.Password)
 	if err != nil {
 		return err
 	}
@@ -76,7 +77,7 @@ func MemoryLeak(opts MemoryleakOpts) error {
 		return fmt.Errorf("error on generating ChannelBind request: %w", err)
 	}
 	opts.Log.Debugf("ChannelBind Request:\n%s", channelBindRequest.String())
-	channelBindResponse, err := channelBindRequest.SendAndReceive(opts.Log, remote, opts.Timeout)
+	channelBindResponse, err := channelBindRequest.SendAndReceive(ctx, opts.Log, remote, opts.Timeout)
 	if err != nil {
 		return fmt.Errorf("error on sending ChannelBind request: %w", err)
 	}
@@ -91,7 +92,7 @@ func MemoryLeak(opts MemoryleakOpts) error {
 		toSend = append(toSend, helper.PutUint16(opts.Size)...)
 		toSend = append(toSend, []byte("xxx")...)
 		toSend = internal.Padding(toSend)
-		err := helper.ConnectionWrite(remote, toSend, opts.Timeout)
+		err := helper.ConnectionWrite(ctx, remote, toSend, opts.Timeout)
 		if err != nil {
 			return fmt.Errorf("error on sending data: %w", err)
 		}

@@ -52,13 +52,12 @@ func (opts SocksOpts) Validate() error {
 	return nil
 }
 
-func Socks(opts SocksOpts) error {
+func Socks(ctx context.Context, opts SocksOpts) error {
 	if err := opts.Validate(); err != nil {
 		return err
 	}
 
 	handler := &socksimplementations.SocksTurnTCPHandler{
-		Ctx:                    context.Background(),
 		Server:                 opts.TurnServer,
 		TURNUsername:           opts.Username,
 		TURNPassword:           opts.Password,
@@ -74,7 +73,7 @@ func Socks(opts SocksOpts) error {
 		Log:          opts.Log,
 	}
 	opts.Log.Infof("starting SOCKS server on %s", opts.Listen)
-	if err := p.Start(); err != nil {
+	if err := p.Start(ctx); err != nil {
 		return err
 	}
 	<-p.Done

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -35,12 +36,12 @@ func (opts InfoOpts) Validate() error {
 	return nil
 }
 
-func Info(opts InfoOpts) error {
+func Info(ctx context.Context, opts InfoOpts) error {
 	if err := opts.Validate(); err != nil {
 		return err
 	}
 
-	if attr, err := testStun(opts); err != nil {
+	if attr, err := testStun(ctx, opts); err != nil {
 		opts.Log.Debugf("STUN error: %v", err)
 		opts.Log.Error("this server does not support the STUN protocol")
 	} else {
@@ -48,7 +49,7 @@ func Info(opts InfoOpts) error {
 		printAttributes(opts, attr)
 	}
 
-	if attr, err := testTurn(opts, internal.RequestedTransportUDP); err != nil {
+	if attr, err := testTurn(ctx, opts, internal.RequestedTransportUDP); err != nil {
 		opts.Log.Debugf("TURN UDP error: %v", err)
 		opts.Log.Error("this server does not support the TURN UDP protocol")
 	} else {
@@ -56,7 +57,7 @@ func Info(opts InfoOpts) error {
 		printAttributes(opts, attr)
 	}
 
-	if attr, err := testTurn(opts, internal.RequestedTransportTCP); err != nil {
+	if attr, err := testTurn(ctx, opts, internal.RequestedTransportTCP); err != nil {
 		opts.Log.Debugf("TURN TCP error: %v", err)
 		opts.Log.Error("this server does not support the TURN TCP protocol")
 	} else {
@@ -67,15 +68,15 @@ func Info(opts InfoOpts) error {
 	return nil
 }
 
-func testStun(opts InfoOpts) ([]internal.Attribute, error) {
-	conn, err := internal.Connect(opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
+func testStun(ctx context.Context, opts InfoOpts) ([]internal.Attribute, error) {
+	conn, err := internal.Connect(ctx, opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
 	if err != nil {
 		return nil, err
 	}
 	defer conn.Close()
 
 	bindingRequest := internal.BindingRequest()
-	bindingResponse, err := bindingRequest.SendAndReceive(opts.Log, conn, opts.Timeout)
+	bindingResponse, err := bindingRequest.SendAndReceive(ctx, opts.Log, conn, opts.Timeout)
 	if err != nil {
 		return nil, fmt.Errorf("error on sending binding request: %w", err)
 	}
@@ -86,15 +87,15 @@ func testStun(opts InfoOpts) ([]internal.Attribute, error) {
 	return bindingResponse.Attributes, nil
 }
 
-func testTurn(opts InfoOpts, proto internal.RequestedTransport) ([]internal.Attribute, error) {
-	conn, err := internal.Connect(opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
+func testTurn(ctx context.Context, opts InfoOpts, proto internal.RequestedTransport) ([]internal.Attribute, error) {
+	conn, err := internal.Connect(ctx, opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
 	if err != nil {
 		return nil, err
 	}
 	defer conn.Close()
 
 	allocateRequest := internal.AllocateRequest(proto, internal.AllocateProtocolIgnore)
-	allocateResponse, err := allocateRequest.SendAndReceive(opts.Log, conn, opts.Timeout)
+	allocateResponse, err := allocateRequest.SendAndReceive(ctx, opts.Log, conn, opts.Timeout)
 	if err != nil {
 		return nil, fmt.Errorf("error on sending allocate request: %w", err)
 	}

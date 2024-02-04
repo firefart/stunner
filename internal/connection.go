@@ -11,7 +11,7 @@ import (
 	"github.com/pion/dtls/v2"
 )
 
-func Connect(protocol string, turnServer string, useTLS bool, timeout time.Duration) (net.Conn, error) {
+func Connect(ctx context.Context, protocol string, turnServer string, useTLS bool, timeout time.Duration) (net.Conn, error) {
 	if !useTLS {
 		// non TLS connection
 		conn, err := net.DialTimeout(protocol, turnServer, timeout)
@@ -39,7 +39,7 @@ func Connect(protocol string, turnServer string, useTLS bool, timeout time.Durat
 		if err != nil {
 			return nil, fmt.Errorf("error on establishing a connection to the server: %w", err)
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		ctx, cancel := context.WithTimeout(ctx, timeout)
 		defer cancel()
 		dtlsConn, err := dtls.ClientWithContext(ctx, conn, &dtls.Config{
 			InsecureSkipVerify: true,
@@ -54,12 +54,12 @@ func Connect(protocol string, turnServer string, useTLS bool, timeout time.Durat
 }
 
 // send serializes a STUN object and sends it on the provided connection
-func (s *Stun) send(conn net.Conn, timeout time.Duration) error {
+func (s *Stun) send(ctx context.Context, conn net.Conn, timeout time.Duration) error {
 	data, err := s.Serialize()
 	if err != nil {
 		return fmt.Errorf("Serialize: %w", err)
 	}
-	if err := helper.ConnectionWrite(conn, data, timeout); err != nil {
+	if err := helper.ConnectionWrite(ctx, conn, data, timeout); err != nil {
 		return fmt.Errorf("ConnectionWrite: %w", err)
 	}
 
@@ -67,13 +67,13 @@ func (s *Stun) send(conn net.Conn, timeout time.Duration) error {
 }
 
 // SendAndReceive sends a TURN request on a connection and gets a response
-func (s *Stun) SendAndReceive(logger DebugLogger, conn net.Conn, timeout time.Duration) (*Stun, error) {
+func (s *Stun) SendAndReceive(ctx context.Context, logger DebugLogger, conn net.Conn, timeout time.Duration) (*Stun, error) {
 	logger.Debugf("Sending\n%s", s.String())
-	err := s.send(conn, timeout)
+	err := s.send(ctx, conn, timeout)
 	if err != nil {
 		return nil, fmt.Errorf("Send: %w", err)
 	}
-	buffer, err := helper.ConnectionRead(conn, timeout)
+	buffer, err := helper.ConnectionRead(ctx, conn, timeout)
 	if err != nil {
 		return nil, fmt.Errorf("ConnectionRead: %w", err)
 	}

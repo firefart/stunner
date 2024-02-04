@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/netip"
@@ -45,7 +46,7 @@ func (opts RangeScanOpts) Validate() error {
 	return nil
 }
 
-func RangeScan(opts RangeScanOpts) error {
+func RangeScan(ctx context.Context, opts RangeScanOpts) error {
 	if err := opts.Validate(); err != nil {
 		return err
 	}
@@ -105,7 +106,7 @@ func RangeScan(opts RangeScanOpts) error {
 			return fmt.Errorf("target is no valid ip address: %w", err)
 		}
 
-		suc, err := scanUDP(opts, ip, 80)
+		suc, err := scanUDP(ctx, opts, ip, 80)
 		if err != nil {
 			opts.Log.Errorf("UDP %s: %v", ip, err)
 		}
@@ -121,7 +122,7 @@ func RangeScan(opts RangeScanOpts) error {
 			return fmt.Errorf("target is no valid ip address: %w", err)
 		}
 
-		suc, err := scanTCP(opts, ip, 80)
+		suc, err := scanTCP(ctx, opts, ip, 80)
 		if err != nil {
 			opts.Log.Errorf("TCP %s: %v", ip, err)
 		}
@@ -132,8 +133,8 @@ func RangeScan(opts RangeScanOpts) error {
 	return nil
 }
 
-func scanTCP(opts RangeScanOpts, targetHost netip.Addr, targetPort uint16) (bool, error) {
-	conn, err := internal.Connect(opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
+func scanTCP(ctx context.Context, opts RangeScanOpts, targetHost netip.Addr, targetPort uint16) (bool, error) {
+	conn, err := internal.Connect(ctx, opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
 	if err != nil {
 		return false, err
 	}
@@ -145,7 +146,7 @@ func scanTCP(opts RangeScanOpts, targetHost netip.Addr, targetPort uint16) (bool
 	}
 
 	allocateRequest := internal.AllocateRequest(internal.RequestedTransportTCP, addressFamily)
-	allocateResponse, err := allocateRequest.SendAndReceive(opts.Log, conn, opts.Timeout)
+	allocateResponse, err := allocateRequest.SendAndReceive(ctx, opts.Log, conn, opts.Timeout)
 	if err != nil {
 		return false, fmt.Errorf("error on sending allocate request 1: %w", err)
 	}
@@ -157,7 +158,7 @@ func scanTCP(opts RangeScanOpts, targetHost netip.Addr, targetPort uint16) (bool
 	nonce := string(allocateResponse.GetAttribute(internal.AttrNonce).Value)
 
 	allocateRequest = internal.AllocateRequestAuth(opts.Username, opts.Password, nonce, realm, internal.RequestedTransportTCP, addressFamily)
-	allocateResponse, err = allocateRequest.SendAndReceive(opts.Log, conn, opts.Timeout)
+	allocateResponse, err = allocateRequest.SendAndReceive(ctx, opts.Log, conn, opts.Timeout)
 	if err != nil {
 		return false, fmt.Errorf("error on sending allocate request 2: %w", err)
 	}
@@ -169,7 +170,7 @@ func scanTCP(opts RangeScanOpts, targetHost netip.Addr, targetPort uint16) (bool
 	if err != nil {
 		return false, fmt.Errorf("error on generating Connect request: %w", err)
 	}
-	connectResponse, err := connectRequest.SendAndReceive(opts.Log, conn, opts.Timeout)
+	connectResponse, err := connectRequest.SendAndReceive(ctx, opts.Log, conn, opts.Timeout)
 	if err != nil {
 		// ignore timeouts, a timeout means open port
 		if errors.Is(err, helper.ErrTimeout) {
@@ -184,8 +185,8 @@ func scanTCP(opts RangeScanOpts, targetHost netip.Addr, targetPort uint16) (bool
 	return true, nil
 }
 
-func scanUDP(opts RangeScanOpts, targetHost netip.Addr, targetPort uint16) (bool, error) {
-	remote, _, _, err := internal.SetupTurnConnection(opts.Log, opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout, targetHost, targetPort, opts.Username, opts.Password)
+func scanUDP(ctx context.Context, opts RangeScanOpts, targetHost netip.Addr, targetPort uint16) (bool, error) {
+	remote, _, _, err := internal.SetupTurnConnection(ctx, opts.Log, opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout, targetHost, targetPort, opts.Username, opts.Password)
 	if err != nil {
 		return false, err
 	}
