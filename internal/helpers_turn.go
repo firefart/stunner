@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"fmt"
 	"net"
@@ -127,8 +128,8 @@ func ConvertXORAddr(input []byte, transactionID string) (string, uint16, error) 
 //	CreatePermission
 //
 // it returns the connection, the realm, the nonce and an error
-func SetupTurnConnection(logger DebugLogger, connectProtocol string, turnServer string, useTLS bool, timeout time.Duration, targetHost netip.Addr, targetPort uint16, username, password string) (net.Conn, string, string, error) {
-	remote, err := Connect(connectProtocol, turnServer, useTLS, timeout)
+func SetupTurnConnection(ctx context.Context, logger DebugLogger, connectProtocol string, turnServer string, useTLS bool, timeout time.Duration, targetHost netip.Addr, targetPort uint16, username, password string) (net.Conn, string, string, error) {
+	remote, err := Connect(ctx, connectProtocol, turnServer, useTLS, timeout)
 	if err != nil {
 		return nil, "", "", err
 	}
@@ -139,7 +140,7 @@ func SetupTurnConnection(logger DebugLogger, connectProtocol string, turnServer 
 	}
 
 	allocateRequest := AllocateRequest(RequestedTransportUDP, addressFamily)
-	allocateResponse, err := allocateRequest.SendAndReceive(logger, remote, timeout)
+	allocateResponse, err := allocateRequest.SendAndReceive(ctx, logger, remote, timeout)
 	if err != nil {
 		return nil, "", "", fmt.Errorf("error on sending AllocateRequest: %w", err)
 	}
@@ -151,7 +152,7 @@ func SetupTurnConnection(logger DebugLogger, connectProtocol string, turnServer 
 	nonce := string(allocateResponse.GetAttribute(AttrNonce).Value)
 
 	allocateRequest = AllocateRequestAuth(username, password, nonce, realm, RequestedTransportUDP, addressFamily)
-	allocateResponse, err = allocateRequest.SendAndReceive(logger, remote, timeout)
+	allocateResponse, err = allocateRequest.SendAndReceive(ctx, logger, remote, timeout)
 	if err != nil {
 		return nil, "", "", fmt.Errorf("error on sending AllocateRequest Auth: %w", err)
 	}
@@ -162,7 +163,7 @@ func SetupTurnConnection(logger DebugLogger, connectProtocol string, turnServer 
 	if err != nil {
 		return nil, "", "", fmt.Errorf("error on generating CreatePermissionRequest: %w", err)
 	}
-	permissionResponse, err := permissionRequest.SendAndReceive(logger, remote, timeout)
+	permissionResponse, err := permissionRequest.SendAndReceive(ctx, logger, remote, timeout)
 	if err != nil {
 		return nil, "", "", fmt.Errorf("error on sending CreatePermissionRequest: %w", err)
 	}

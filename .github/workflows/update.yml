@@ -19,9 +19,12 @@ jobs:
         with:
           go-version: "stable"
 
+      - name: Install Task
+        uses: arduino/setup-task@v2
+
       - name: update
         run: |
-          make update
+          task update
 
       - name: setup git config
         run: |

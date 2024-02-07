@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -43,7 +44,7 @@ func (opts BruteforceOpts) Validate() error {
 	return nil
 }
 
-func BruteForce(opts BruteforceOpts) error {
+func BruteForce(ctx context.Context, opts BruteforceOpts) error {
 	if err := opts.Validate(); err != nil {
 		return err
 	}
@@ -56,7 +57,7 @@ func BruteForce(opts BruteforceOpts) error {
 
 	scanner := bufio.NewScanner(pfile)
 	for scanner.Scan() {
-		if err := testPassword(opts, scanner.Text()); err != nil {
+		if err := testPassword(ctx, opts, scanner.Text()); err != nil {
 			return err
 		}
 	}
@@ -67,15 +68,15 @@ func BruteForce(opts BruteforceOpts) error {
 	return nil
 }
 
-func testPassword(opts BruteforceOpts, password string) error {
-	remote, err := internal.Connect(opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
+func testPassword(ctx context.Context, opts BruteforceOpts, password string) error {
+	remote, err := internal.Connect(ctx, opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
 	if err != nil {
 		return err
 	}
 
 	addressFamily := internal.AllocateProtocolIgnore
 	allocateRequest := internal.AllocateRequest(internal.RequestedTransportUDP, addressFamily)
-	allocateResponse, err := allocateRequest.SendAndReceive(opts.Log, remote, opts.Timeout)
+	allocateResponse, err := allocateRequest.SendAndReceive(ctx, opts.Log, remote, opts.Timeout)
 	if err != nil {
 		return fmt.Errorf("error on sending AllocateRequest: %w", err)
 	}
@@ -87,7 +88,7 @@ func testPassword(opts BruteforceOpts, password string) error {
 	nonce := string(allocateResponse.GetAttribute(internal.AttrNonce).Value)
 
 	allocateRequest = internal.AllocateRequestAuth(opts.Username, password, nonce, realm, internal.RequestedTransportUDP, addressFamily)
-	allocateResponse, err = allocateRequest.SendAndReceive(opts.Log, remote, opts.Timeout)
+	allocateResponse, err = allocateRequest.SendAndReceive(ctx, opts.Log, remote, opts.Timeout)
 	if err != nil {
 		return fmt.Errorf("error on sending AllocateRequest Auth: %w", err)
 	}

@@ -4,20 +4,20 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go: ["stable"]
     steps:
-      - name: Set up Go ${{ matrix.go }}
+      - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go }}
+          go-version: "stable"
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
 
       - name: Check out code
         uses: actions/checkout@v4
 
       - name: build cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -28,8 +28,11 @@ jobs:
         run: |
           go get -v -t -d ./...
 
-      - name: Build
-        run: make build
+      - name: Build linux
+        run: task linux
+
+      - name: Build windows
+        run: task windows
 
       - name: Test
-        run: make test
+        run: task test

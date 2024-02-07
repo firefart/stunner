@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -42,20 +43,20 @@ func (opts BruteTransportOpts) Validate() error {
 	return nil
 }
 
-func BruteTransports(opts BruteTransportOpts) error {
+func BruteTransports(ctx context.Context, opts BruteTransportOpts) error {
 	if err := opts.Validate(); err != nil {
 		return err
 	}
 
 	for i := 0; i <= 255; i++ {
-		conn, err := internal.Connect(opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
+		conn, err := internal.Connect(ctx, opts.Protocol, opts.TurnServer, opts.UseTLS, opts.Timeout)
 		if err != nil {
 			return err
 		}
 
 		x := internal.RequestedTransport(uint32(i))
 		allocateRequest := internal.AllocateRequest(x, internal.AllocateProtocolIgnore)
-		allocateResponse, err := allocateRequest.SendAndReceive(opts.Log, conn, opts.Timeout)
+		allocateResponse, err := allocateRequest.SendAndReceive(ctx, opts.Log, conn, opts.Timeout)
 		if err != nil {
 			return fmt.Errorf("error on sending allocate request: %w", err)
 		}
@@ -64,7 +65,7 @@ func BruteTransports(opts BruteTransportOpts) error {
 		nonce := string(allocateResponse.GetAttribute(internal.AttrNonce).Value)
 
 		allocateRequest = internal.AllocateRequestAuth(opts.Username, opts.Password, nonce, realm, x, internal.AllocateProtocolIgnore)
-		allocateResponse, err = allocateRequest.SendAndReceive(opts.Log, conn, opts.Timeout)
+		allocateResponse, err = allocateRequest.SendAndReceive(ctx, opts.Log, conn, opts.Timeout)
 		if err != nil {
 			return fmt.Errorf("error on sending allocate request auth: %w", err)
 		}

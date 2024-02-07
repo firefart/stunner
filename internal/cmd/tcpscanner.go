@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/hex"
 	"fmt"
@@ -55,7 +56,7 @@ func (opts TCPScannerOpts) Validate() error {
 	return nil
 }
 
-func TCPScanner(opts TCPScannerOpts) error {
+func TCPScanner(ctx context.Context, opts TCPScannerOpts) error {
 	if err := opts.Validate(); err != nil {
 		return err
 	}
@@ -79,7 +80,7 @@ func TCPScanner(opts TCPScannerOpts) error {
 				return fmt.Errorf("Invalid port %s: %w", port, err)
 			}
 			opts.Log.Debugf("Scanning %s:%d", ip.IP.String(), portI)
-			if err := httpScan(opts, ip.IP, uint16(portI)); err != nil {
+			if err := httpScan(ctx, opts, ip.IP, uint16(portI)); err != nil {
 				opts.Log.Errorf("error on running HTTP Scan for %s:%d: %v", ip.IP.String(), portI, err)
 			}
 		}
@@ -88,8 +89,8 @@ func TCPScanner(opts TCPScannerOpts) error {
 	return nil
 }
 
-func httpScan(opts TCPScannerOpts, ip netip.Addr, port uint16) error {
-	controlConnection, dataConnection, err := internal.SetupTurnTCPConnection(opts.Log, opts.TurnServer, opts.UseTLS, opts.Timeout, ip, port, opts.Username, opts.Password)
+func httpScan(ctx context.Context, opts TCPScannerOpts, ip netip.Addr, port uint16) error {
+	_, _, controlConnection, dataConnection, err := internal.SetupTurnTCPConnection(ctx, opts.Log, opts.TurnServer, opts.UseTLS, opts.Timeout, ip, port, opts.Username, opts.Password)
 	if err != nil {
 		return err
 	}
@@ -103,10 +104,10 @@ func httpScan(opts TCPScannerOpts, ip netip.Addr, port uint16) error {
 
 	if useTLS {
 		tlsConn := tls.Client(dataConnection, &tls.Config{InsecureSkipVerify: true})
-		if err := helper.ConnectionWrite(tlsConn, []byte(httpRequest), opts.Timeout); err != nil {
+		if err := helper.ConnectionWrite(ctx, tlsConn, []byte(httpRequest), opts.Timeout); err != nil {
 			return fmt.Errorf("error on sending TLS data: %w", err)
 		}
-		data, err := helper.ConnectionRead(tlsConn, opts.Timeout)
+		data, err := helper.ConnectionRead(ctx, tlsConn, opts.Timeout)
 		if err != nil {
 			return fmt.Errorf("error on reading after sending TLS data: %w", err)
 		}
@@ -116,10 +117,10 @@ func httpScan(opts TCPScannerOpts, ip netip.Addr, port uint16) error {
 	}
 
 	// plain text connection
-	if err := helper.ConnectionWrite(dataConnection, []byte(httpRequest), opts.Timeout); err != nil {
+	if err := helper.ConnectionWrite(ctx, dataConnection, []byte(httpRequest), opts.Timeout); err != nil {
 		return fmt.Errorf("error on sending data: %w", err)
 	}
-	data, err := helper.ConnectionRead(dataConnection, opts.Timeout)
+	data, err := helper.ConnectionRead(ctx, dataConnection, opts.Timeout)
 	if err != nil {
 		return fmt.Errorf("error on reading after sending data: %w", err)
 	}

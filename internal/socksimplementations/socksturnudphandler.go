@@ -17,7 +17,6 @@ import (
 
 // SocksTurnUDPHandler is the implementation of a UDP TURN server
 type SocksTurnUDPHandler struct {
-	Ctx                    context.Context
 	TURNUsername           string
 	TURNPassword           string
 	Server                 string
@@ -30,7 +29,7 @@ type SocksTurnUDPHandler struct {
 }
 
 // PreHandler creates a connection to the target server and returns a connection to send data
-func (s *SocksTurnUDPHandler) PreHandler(request socks.Request) (io.ReadWriteCloser, *socks.Error) {
+func (s *SocksTurnUDPHandler) Init(ctx context.Context, request socks.Request) (io.ReadWriteCloser, *socks.Error) {
 	var target netip.Addr
 	var err error
 	switch request.AddressType {
@@ -41,7 +40,7 @@ func (s *SocksTurnUDPHandler) PreHandler(request socks.Request) (io.ReadWriteClo
 		}
 		target = tmp
 	case socks.RequestAddressTypeDomainname:
-		names, err := helper.ResolveName(s.Ctx, string(request.DestinationAddress))
+		names, err := helper.ResolveName(ctx, string(request.DestinationAddress))
 		if err != nil {
 			return nil, socks.NewError(socks.RequestReplyHostUnreachable, err)
 		}
@@ -58,7 +57,7 @@ func (s *SocksTurnUDPHandler) PreHandler(request socks.Request) (io.ReadWriteClo
 		return nil, socks.NewError(socks.RequestReplyHostUnreachable, fmt.Errorf("dropping non private connection to %s:%d", target.String(), request.DestinationPort))
 	}
 
-	remote, realm, nonce, err := internal.SetupTurnConnection(s.Log, s.ConnectProtocol, s.Server, s.UseTLS, s.Timeout, target, request.DestinationPort, s.TURNUsername, s.TURNPassword)
+	remote, realm, nonce, err := internal.SetupTurnConnection(ctx, s.Log, s.ConnectProtocol, s.Server, s.UseTLS, s.Timeout, target, request.DestinationPort, s.TURNUsername, s.TURNPassword)
 	if err != nil {
 		return nil, socks.NewError(socks.RequestReplyHostUnreachable, err)
 	}
@@ -73,7 +72,7 @@ func (s *SocksTurnUDPHandler) PreHandler(request socks.Request) (io.ReadWriteClo
 		return nil, socks.NewError(socks.RequestReplyHostUnreachable, fmt.Errorf("error on generating ChannelBindRequest: %w", err))
 	}
 	s.Log.Debugf("ChannelBind Request:\n%s", channelBindRequest.String())
-	channelBindResponse, err := channelBindRequest.SendAndReceive(s.Log, remote, s.Timeout)
+	channelBindResponse, err := channelBindRequest.SendAndReceive(ctx, s.Log, remote, s.Timeout)
 	if err != nil {
 		return nil, socks.NewError(socks.RequestReplyHostUnreachable, fmt.Errorf("error on sending ChannelBindRequest: %w", err))
 	}
@@ -85,7 +84,7 @@ func (s *SocksTurnUDPHandler) PreHandler(request socks.Request) (io.ReadWriteClo
 }
 
 // CopyFromRemoteToClient is used to send data and remove the extra channel data header
-func (s *SocksTurnUDPHandler) CopyFromRemoteToClient(ctx context.Context, remote io.ReadCloser, client io.WriteCloser) error {
+func (s *SocksTurnUDPHandler) ReadFromRemote(ctx context.Context, remote io.ReadCloser, client io.WriteCloser) error {
 	clientConn, ok := client.(net.Conn)
 	if !ok {
 		return fmt.Errorf("could not cast client to net.Conn")
@@ -95,7 +94,7 @@ func (s *SocksTurnUDPHandler) CopyFromRemoteToClient(ctx context.Context, remote
 		return fmt.Errorf("could not cast remote to net.Conn")
 	}
 
-	recv, err := helper.ConnectionRead(remoteConn, s.Timeout)
+	recv, err := helper.ConnectionRead(ctx, remoteConn, s.Timeout)
 	if err != nil {
 		return err
 	}
@@ -106,7 +105,7 @@ func (s *SocksTurnUDPHandler) CopyFromRemoteToClient(ctx context.Context, remote
 	}
 	s.Log.Debugf("received %d bytes on channel %02x", len(data), channel)
 
-	err = helper.ConnectionWrite(clientConn, data, s.Timeout)
+	err = helper.ConnectionWrite(ctx, clientConn, data, s.Timeout)
 	if err != nil {
 		return err
 	}
@@ -114,7 +113,7 @@ func (s *SocksTurnUDPHandler) CopyFromRemoteToClient(ctx context.Context, remote
 }
 
 // CopyFromClientToRemote is used to send data and add the extra channel data header
-func (s *SocksTurnUDPHandler) CopyFromClientToRemote(ctx context.Context, client io.ReadCloser, remote io.WriteCloser) error {
+func (s *SocksTurnUDPHandler) ReadFromClient(ctx context.Context, client io.ReadCloser, remote io.WriteCloser) error {
 	clientConn, ok := client.(net.Conn)
 	if !ok {
 		return fmt.Errorf("could not cast client to net.Conn")
@@ -124,7 +123,7 @@ func (s *SocksTurnUDPHandler) CopyFromClientToRemote(ctx context.Context, client
 		return fmt.Errorf("could not cast remote to net.Conn")
 	}
 
-	toSend, err := helper.ConnectionRead(clientConn, s.Timeout)
+	toSend, err := helper.ConnectionRead(ctx, clientConn, s.Timeout)
 	if err != nil {
 		return err
 	}
@@ -136,7 +135,7 @@ func (s *SocksTurnUDPHandler) CopyFromClientToRemote(ctx context.Context, client
 	buf = append(buf, helper.PutUint16(uint16(toSendLen))...)
 	buf = append(buf, toSend...)
 
-	err = helper.ConnectionWrite(remoteConn, buf, s.Timeout)
+	err = helper.ConnectionWrite(ctx, remoteConn, buf, s.Timeout)
 	if err != nil {
 		return err
 	}
@@ -148,6 +147,6 @@ func (s *SocksTurnUDPHandler) Refresh(_ context.Context) {
 }
 
 // Cleanup is not used in this implementation
-func (s *SocksTurnUDPHandler) Cleanup() error {
+func (s *SocksTurnUDPHandler) Close(ctx context.Context) error {
 	return nil
 }
