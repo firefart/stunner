@@ -117,18 +117,42 @@ func (s *SocksTurnTCPHandler) Refresh(ctx context.Context) {
 
 const bufferLength = 1024 * 100
 
+type readDeadline interface {
+	SetReadDeadline(time.Time) error
+}
+type writeDeadline interface {
+	SetWriteDeadline(time.Time) error
+}
+
 // ReadFromClient is used to copy data
 func (s *SocksTurnTCPHandler) ReadFromClient(ctx context.Context, client io.ReadCloser, remote io.WriteCloser) error {
 	for {
 		// anonymous func for defer
 		// this might not be the fastest, but it does the trick
+		// in this case the timeout is per buffer read/write to support long
+		// running downloads.
 		err := func() error {
-			ctx, cancel := context.WithTimeout(ctx, s.Timeout)
+			timeOut := time.Now().Add(s.Timeout)
+
+			ctx, cancel := context.WithDeadline(ctx, timeOut)
 			defer cancel()
+
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
 			default:
+				if c, ok := remote.(writeDeadline); ok {
+					if err := c.SetWriteDeadline(timeOut); err != nil {
+						return fmt.Errorf("could not set write deadline on remote: %v", err)
+					}
+				}
+
+				if c, ok := client.(readDeadline); ok {
+					if err := c.SetReadDeadline(timeOut); err != nil {
+						return fmt.Errorf("could not set read deadline on client: %v", err)
+					}
+				}
+
 				i, err := io.CopyN(remote, client, bufferLength)
 				if errors.Is(err, io.EOF) {
 					return nil
@@ -150,13 +174,30 @@ func (s *SocksTurnTCPHandler) ReadFromRemote(ctx context.Context, remote io.Read
 	for {
 		// anonymous func for defer
 		// this might not be the fastest, but it does the trick
+		// in this case the timeout is per buffer read/write to support long
+		// running downloads.
 		err := func() error {
-			ctx, cancel := context.WithTimeout(ctx, s.Timeout)
+			timeOut := time.Now().Add(s.Timeout)
+
+			ctx, cancel := context.WithDeadline(ctx, timeOut)
 			defer cancel()
+
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
 			default:
+				if c, ok := client.(writeDeadline); ok {
+					if err := c.SetWriteDeadline(timeOut); err != nil {
+						return fmt.Errorf("could not set write deadline on client: %v", err)
+					}
+				}
+
+				if c, ok := remote.(readDeadline); ok {
+					if err := c.SetReadDeadline(timeOut); err != nil {
+						return fmt.Errorf("could not set read deadline on remote: %v", err)
+					}
+				}
+
 				i, err := io.CopyN(client, remote, bufferLength)
 				if errors.Is(err, io.EOF) {
 					return nil

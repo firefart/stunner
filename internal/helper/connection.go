@@ -3,6 +3,7 @@ package helper
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"time"
@@ -17,13 +18,18 @@ func ConnectionRead(ctx context.Context, conn net.Conn, timeout time.Duration) (
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	// need this otherwise the read call is blocking forever
+	if err := conn.SetReadDeadline(time.Now().Add(timeout)); err != nil {
+		return nil, fmt.Errorf("could not set read deadline: %v", err)
+	}
+
 	bufLen := 1024
+	buf := make([]byte, bufLen)
 	for {
 		select {
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		default:
-			buf := make([]byte, bufLen)
 			i, err := conn.Read(buf)
 			if err != nil {
 				if err != io.EOF {
@@ -52,6 +58,11 @@ func ConnectionWrite(ctx context.Context, conn net.Conn, data []byte, timeout ti
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
+
+	// need this otherwise the read call is blocking forever
+	if err := conn.SetWriteDeadline(time.Now().Add(timeout)); err != nil {
+		return fmt.Errorf("could not set write deadline: %v", err)
+	}
 
 	for {
 		select {
