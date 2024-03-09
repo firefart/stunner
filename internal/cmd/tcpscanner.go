@@ -107,7 +107,7 @@ func httpScan(ctx context.Context, opts TCPScannerOpts, ip netip.Addr, port uint
 		if err := helper.ConnectionWrite(ctx, tlsConn, []byte(httpRequest), opts.Timeout); err != nil {
 			return fmt.Errorf("error on sending TLS data: %w", err)
 		}
-		data, err := helper.ConnectionRead(ctx, tlsConn, opts.Timeout)
+		data, err := helper.ConnectionReadAll(ctx, tlsConn, opts.Timeout)
 		if err != nil {
 			return fmt.Errorf("error on reading after sending TLS data: %w", err)
 		}
@@ -120,7 +120,7 @@ func httpScan(ctx context.Context, opts TCPScannerOpts, ip netip.Addr, port uint
 	if err := helper.ConnectionWrite(ctx, dataConnection, []byte(httpRequest), opts.Timeout); err != nil {
 		return fmt.Errorf("error on sending data: %w", err)
 	}
-	data, err := helper.ConnectionRead(ctx, dataConnection, opts.Timeout)
+	data, err := helper.ConnectionReadAll(ctx, dataConnection, opts.Timeout)
 	if err != nil {
 		return fmt.Errorf("error on reading after sending data: %w", err)
 	}

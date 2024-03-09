@@ -1,10 +1,12 @@
 package internal
 
 import (
+	"bufio"
 	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
+	"slices"
 	"time"
 
 	"github.com/firefart/stunner/internal/helper"
@@ -73,11 +75,29 @@ func (s *Stun) SendAndReceive(ctx context.Context, logger DebugLogger, conn net.
 	if err != nil {
 		return nil, fmt.Errorf("Send: %w", err)
 	}
-	buffer, err := helper.ConnectionRead(ctx, conn, timeout)
+
+	// need this otherwise the read call is blocking forever
+	if err := conn.SetReadDeadline(time.Now().Add(timeout)); err != nil {
+		return nil, fmt.Errorf("could not set read deadline: %v", err)
+	}
+
+	r := bufio.NewReader(conn)
+	// read the header first to get the message length
+	header, err := helper.ConnectionRead(ctx, r, headerSize, timeout)
+	if err != nil {
+		return nil, fmt.Errorf("ConnectionRead Header: %w", err)
+	}
+	headerParsed := parseHeader(header)
+	expectedPacketSize := int(headerParsed.MessageLength) // + headerSize
+	logger.Debugf("expectedPacketSize %d", expectedPacketSize)
+
+	// only read the message length and leave potential additional data on the connection
+	// for later read operations
+	buffer, err := helper.ConnectionRead(ctx, r, expectedPacketSize, timeout)
 	if err != nil {
 		return nil, fmt.Errorf("ConnectionRead: %w", err)
 	}
-	resp, err := fromBytes(buffer)
+	resp, err := fromBytes(slices.Concat(header, buffer))
 	if err != nil {
 		return nil, fmt.Errorf("fromBytes: %w", err)
 	}

@@ -153,7 +153,7 @@ func snmpScan(ctx context.Context, opts UDPScannerOpts, ip netip.Addr, port uint
 		return fmt.Errorf("error on sending SNMP request: %w", err)
 	}
 
-	resp, err := helper.ConnectionRead(ctx, remote, opts.Timeout)
+	resp, err := helper.ConnectionReadAll(ctx, remote, opts.Timeout)
 	if err != nil {
 		// ignore timeouts
 		if errors.Is(err, helper.ErrTimeout) {
@@ -245,7 +245,7 @@ func dnsScan(ctx context.Context, opts UDPScannerOpts, ip netip.Addr, port uint1
 		return fmt.Errorf("error on sending DNS request: %w", err)
 	}
 
-	resp, err := helper.ConnectionRead(ctx, remote, opts.Timeout)
+	resp, err := helper.ConnectionReadAll(ctx, remote, opts.Timeout)
 	if err != nil {
 		// ignore timeouts
 		if errors.Is(err, helper.ErrTimeout) {
