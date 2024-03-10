@@ -31,14 +31,14 @@ type SocksTurnTCPHandler struct {
 }
 
 // PreHandler connects to the STUN server, sets the connection up and returns the data connections
-func (s *SocksTurnTCPHandler) Init(ctx context.Context, request socks.Request) (io.ReadWriteCloser, *socks.Error) {
+func (s *SocksTurnTCPHandler) Init(ctx context.Context, request socks.Request) (context.Context, io.ReadWriteCloser, *socks.Error) {
 	var target netip.Addr
 	var err error
 	switch request.AddressType {
 	case socks.RequestAddressTypeIPv4, socks.RequestAddressTypeIPv6:
 		tmp, ok := netip.AddrFromSlice(request.DestinationAddress)
 		if !ok {
-			return nil, socks.NewError(socks.RequestReplyAddressTypeNotSupported, fmt.Errorf("%02x is no ip address", request.DestinationAddress))
+			return ctx, nil, socks.NewError(socks.RequestReplyAddressTypeNotSupported, fmt.Errorf("%02x is no ip address", request.DestinationAddress))
 		}
 		target = tmp
 	case socks.RequestAddressTypeDomainname:
@@ -49,32 +49,32 @@ func (s *SocksTurnTCPHandler) Init(ctx context.Context, request socks.Request) (
 			// input is a hostname
 			names, err := helper.ResolveName(ctx, string(request.DestinationAddress))
 			if err != nil {
-				return nil, socks.NewError(socks.RequestReplyHostUnreachable, err)
+				return ctx, nil, socks.NewError(socks.RequestReplyHostUnreachable, err)
 			}
 			if len(names) == 0 {
-				return nil, socks.NewError(socks.RequestReplyHostUnreachable, fmt.Errorf("%s could not be resolved", string(request.DestinationAddress)))
+				return ctx, nil, socks.NewError(socks.RequestReplyHostUnreachable, fmt.Errorf("%s could not be resolved", string(request.DestinationAddress)))
 			}
 			target = names[0]
 		}
 	default:
-		return nil, socks.NewError(socks.RequestReplyAddressTypeNotSupported, fmt.Errorf("AddressType %#x not implemented", request.AddressType))
+		return ctx, nil, socks.NewError(socks.RequestReplyAddressTypeNotSupported, fmt.Errorf("AddressType %#x not implemented", request.AddressType))
 	}
 
 	if s.DropNonPrivateRequests && !helper.IsPrivateIP(target) {
 		s.Log.Debugf("dropping non private connection to %s:%d", target.String(), request.DestinationPort)
-		return nil, socks.NewError(socks.RequestReplyHostUnreachable, fmt.Errorf("dropping non private connection to %s:%d", target.String(), request.DestinationPort))
+		return ctx, nil, socks.NewError(socks.RequestReplyHostUnreachable, fmt.Errorf("dropping non private connection to %s:%d", target.String(), request.DestinationPort))
 	}
 
 	realm, nonce, controlConnection, dataConnection, err := internal.SetupTurnTCPConnection(ctx, s.Log, s.Server, s.UseTLS, s.Timeout, target, request.DestinationPort, s.TURNUsername, s.TURNPassword)
 	if err != nil {
-		return nil, socks.NewError(socks.RequestReplyHostUnreachable, err)
+		return ctx, nil, socks.NewError(socks.RequestReplyHostUnreachable, err)
 	}
 	s.realm = realm
 	s.nonce = nonce
 
 	// we need to keep this connection open
 	s.ControlConnection = controlConnection
-	return dataConnection, nil
+	return ctx, dataConnection, nil
 }
 
 // Refresh is used to refresh an active connection every 2 minutes
