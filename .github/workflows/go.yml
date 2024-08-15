@@ -18,14 +18,6 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: build cache
-        uses: actions/cache@v4
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
       - name: Get dependencies
         run: |
           go get -v -t -d ./...
