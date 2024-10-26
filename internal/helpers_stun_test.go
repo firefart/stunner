@@ -8,7 +8,7 @@ import (
 func TestPadding(t *testing.T) {
 	t.Parallel()
 
-	var tests = []struct {
+	tests := []struct {
 		testName    string
 		inputLen    int
 		expectedLen int

@@ -17,10 +17,11 @@ func ConnectRequest(target netip.Addr, port uint16) (*Stun, error) {
 		Method: MsgTypeMethodConnect,
 	}
 
-	s.Attributes = []Attribute{{
-		Type:  AttrXorPeerAddress,
-		Value: targetXOR,
-	},
+	s.Attributes = []Attribute{
+		{
+			Type:  AttrXorPeerAddress,
+			Value: targetXOR,
+		},
 	}
 
 	return s, nil
@@ -40,19 +41,20 @@ func ConnectRequestAuth(username, password, nonce, realm string, target netip.Ad
 		Method: MsgTypeMethodConnect,
 	}
 
-	s.Attributes = []Attribute{{
-		Type:  AttrXorPeerAddress,
-		Value: targetXOR,
-	}, {
-		Type:  AttrUsername,
-		Value: []byte(username),
-	}, {
-		Type:  AttrRealm,
-		Value: []byte(realm),
-	}, {
-		Type:  AttrNonce,
-		Value: []byte(nonce),
-	},
+	s.Attributes = []Attribute{
+		{
+			Type:  AttrXorPeerAddress,
+			Value: targetXOR,
+		}, {
+			Type:  AttrUsername,
+			Value: []byte(username),
+		}, {
+			Type:  AttrRealm,
+			Value: []byte(realm),
+		}, {
+			Type:  AttrNonce,
+			Value: []byte(nonce),
+		},
 	}
 
 	return s, nil
@@ -68,19 +70,20 @@ func ConnectionBindRequest(connectionID []byte, username, password, nonce, realm
 		Method: MsgTypeMethodConnectionBind,
 	}
 
-	s.Attributes = []Attribute{{
-		Type:  AttrConnectionID,
-		Value: connectionID,
-	}, {
-		Type:  AttrUsername,
-		Value: []byte(username),
-	}, {
-		Type:  AttrRealm,
-		Value: []byte(realm),
-	}, {
-		Type:  AttrNonce,
-		Value: []byte(nonce),
-	},
+	s.Attributes = []Attribute{
+		{
+			Type:  AttrConnectionID,
+			Value: connectionID,
+		}, {
+			Type:  AttrUsername,
+			Value: []byte(username),
+		}, {
+			Type:  AttrRealm,
+			Value: []byte(realm),
+		}, {
+			Type:  AttrNonce,
+			Value: []byte(nonce),
+		},
 	}
 
 	return s

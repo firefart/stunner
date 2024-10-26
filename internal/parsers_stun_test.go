@@ -9,7 +9,7 @@ import (
 func TestFromBytes(t *testing.T) {
 	t.Parallel()
 
-	var tests = []struct {
+	tests := []struct {
 		testName string
 		input    string
 	}{
@@ -43,7 +43,7 @@ func TestFromBytes(t *testing.T) {
 func TestFromBytesFail(t *testing.T) {
 	t.Parallel()
 
-	var tests = []struct {
+	tests := []struct {
 		testName string
 		input    string
 	}{

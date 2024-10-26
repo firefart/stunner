@@ -23,7 +23,7 @@ func TestXorAddr(t *testing.T) {
 func TestConvertXORAddr(t *testing.T) {
 	t.Parallel()
 
-	var tests = []struct {
+	tests := []struct {
 		input         string
 		transactionID string
 		expectedHost  string

@@ -8,16 +8,16 @@ import (
 	"github.com/firefart/stunner/internal/helper"
 )
 
-const headerSize = 20
-const messageIntegritySize = 20
+const (
+	headerSize           = 20
+	messageIntegritySize = 20
+)
 
 // nolint:deadcode,varcheck,unused
 const fingerPrintSize = 4
 
-var (
-	// MagicCookie is the fixed value according to the rfc
-	MagicCookie = []byte{'\x21', '\x12', '\xa4', '\x42'}
-)
+// MagicCookie is the fixed value according to the rfc
+var MagicCookie = []byte{'\x21', '\x12', '\xa4', '\x42'}
 
 // Stun is the main object
 type Stun struct {

@@ -17,6 +17,7 @@ import (
 	"net"
 	"net/netip"
 	"os"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -395,6 +396,20 @@ func main() {
 						DomainName:      domain,
 						IPs:             ips,
 					})
+				},
+			},
+			{
+				Name:        "version",
+				Usage:       "prints the current version and build infos",
+				Description: "prints the current version and build infos",
+				Action: func(ctx *cli.Context) error {
+					info, ok := debug.ReadBuildInfo()
+					if !ok {
+						return fmt.Errorf("could not get buildinfo")
+					}
+					fmt.Printf("Build info:\n")
+					fmt.Printf("%s", info)
+					return nil
 				},
 			},
 		},

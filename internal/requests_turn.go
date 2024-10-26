@@ -48,19 +48,20 @@ func AllocateRequestAuth(username, password, nonce, realm string, targetProtocol
 		Method: MsgTypeMethodAllocate,
 	}
 
-	s.Attributes = []Attribute{{
-		Type:  AttrRequestedTransport,
-		Value: transport,
-	}, {
-		Type:  AttrUsername,
-		Value: []byte(username),
-	}, {
-		Type:  AttrRealm,
-		Value: []byte(realm),
-	}, {
-		Type:  AttrNonce,
-		Value: []byte(nonce),
-	},
+	s.Attributes = []Attribute{
+		{
+			Type:  AttrRequestedTransport,
+			Value: transport,
+		}, {
+			Type:  AttrUsername,
+			Value: []byte(username),
+		}, {
+			Type:  AttrRealm,
+			Value: []byte(realm),
+		}, {
+			Type:  AttrNonce,
+			Value: []byte(nonce),
+		},
 	}
 
 	if allocateProtcol != AllocateProtocolIgnore {
@@ -88,13 +89,14 @@ func SendRequest(target netip.Addr, port uint16) (*Stun, error) {
 		Method: MsgTypeMethodSend,
 	}
 
-	s.Attributes = []Attribute{{
-		Type:  AttrXorPeerAddress,
-		Value: targetXOR,
-	}, {
-		Type:  AttrData,
-		Value: []byte("pwned by firefart\n"),
-	},
+	s.Attributes = []Attribute{
+		{
+			Type:  AttrXorPeerAddress,
+			Value: targetXOR,
+		}, {
+			Type:  AttrData,
+			Value: []byte("pwned by firefart\n"),
+		},
 	}
 
 	return s, nil
@@ -115,19 +117,20 @@ func CreatePermissionRequest(username, password, nonce, realm string, target net
 		Method: MsgTypeMethodCreatePermission,
 	}
 
-	s.Attributes = []Attribute{{
-		Type:  AttrXorPeerAddress,
-		Value: targetXOR,
-	}, {
-		Type:  AttrUsername,
-		Value: []byte(username),
-	}, {
-		Type:  AttrRealm,
-		Value: []byte(realm),
-	}, {
-		Type:  AttrNonce,
-		Value: []byte(nonce),
-	},
+	s.Attributes = []Attribute{
+		{
+			Type:  AttrXorPeerAddress,
+			Value: targetXOR,
+		}, {
+			Type:  AttrUsername,
+			Value: []byte(username),
+		}, {
+			Type:  AttrRealm,
+			Value: []byte(realm),
+		}, {
+			Type:  AttrNonce,
+			Value: []byte(nonce),
+		},
 	}
 
 	return s, nil
@@ -152,22 +155,23 @@ func ChannelBindRequest(username, password, nonce, realm string, target netip.Ad
 		Method: MsgTypeMethodChannelbind,
 	}
 
-	s.Attributes = []Attribute{{
-		Type:  AttrChannelNumber,
-		Value: append(channelNumber, []byte{0x00, 0x00}...),
-	}, {
-		Type:  AttrXorPeerAddress,
-		Value: targetXOR,
-	}, {
-		Type:  AttrUsername,
-		Value: []byte(username),
-	}, {
-		Type:  AttrRealm,
-		Value: []byte(realm),
-	}, {
-		Type:  AttrNonce,
-		Value: []byte(nonce),
-	},
+	s.Attributes = []Attribute{
+		{
+			Type:  AttrChannelNumber,
+			Value: append(channelNumber, []byte{0x00, 0x00}...),
+		}, {
+			Type:  AttrXorPeerAddress,
+			Value: targetXOR,
+		}, {
+			Type:  AttrUsername,
+			Value: []byte(username),
+		}, {
+			Type:  AttrRealm,
+			Value: []byte(realm),
+		}, {
+			Type:  AttrNonce,
+			Value: []byte(nonce),
+		},
 	}
 
 	return s, nil
@@ -183,16 +187,17 @@ func RefreshRequest(username, password, nonce, realm string) *Stun {
 		Method: MsgTypeMethodRefresh,
 	}
 
-	s.Attributes = []Attribute{{
-		Type:  AttrUsername,
-		Value: []byte(username),
-	}, {
-		Type:  AttrRealm,
-		Value: []byte(realm),
-	}, {
-		Type:  AttrNonce,
-		Value: []byte(nonce),
-	},
+	s.Attributes = []Attribute{
+		{
+			Type:  AttrUsername,
+			Value: []byte(username),
+		}, {
+			Type:  AttrRealm,
+			Value: []byte(realm),
+		}, {
+			Type:  AttrNonce,
+			Value: []byte(nonce),
+		},
 	}
 
 	return s

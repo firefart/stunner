@@ -78,7 +78,7 @@ func ParseMappedAdress(input []byte) (*netip.Addr, uint16, error) {
 		return nil, 0, fmt.Errorf("invalid buffer length %d, need to be > 4", len(input))
 	}
 	family := input[0:2] // 0x0001 = ipv4, 0x0002 = ipv6
-	if !bytes.Equal(family, []byte{00, 01}) && !bytes.Equal(family, []byte{00, 02}) {
+	if !bytes.Equal(family, []byte{0o0, 0o1}) && !bytes.Equal(family, []byte{0o0, 0o2}) {
 		return nil, 0, fmt.Errorf("invalid family %02x", family)
 	}
 	portRaw := input[2:4]
@@ -96,7 +96,7 @@ func ConvertXORAddr(input []byte, transactionID string) (string, uint16, error) 
 		return "", 0, fmt.Errorf("invalid buffer length %d, need to be > 4", len(input))
 	}
 	family := input[0:2] // 0x0001 = ipv4, 0x0002 = ipv6
-	if !bytes.Equal(family, []byte{00, 01}) && !bytes.Equal(family, []byte{00, 02}) {
+	if !bytes.Equal(family, []byte{0o0, 0o1}) && !bytes.Equal(family, []byte{0o0, 0o2}) {
 		return "", 0, fmt.Errorf("invalid family %02x", family)
 	}
 	portRaw := input[2:4]
