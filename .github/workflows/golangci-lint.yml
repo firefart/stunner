@@ -1,5 +1,5 @@
 name: golangci-lint
-on: [push, workflow_dispatch]
+on: [ push, workflow_dispatch ]
 jobs:
   golangci:
     name: lint
