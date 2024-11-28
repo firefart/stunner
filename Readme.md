@@ -162,7 +162,7 @@ return the defaults.
 
 This command tries all passwords from a given file for a username via the TURN protocol (UDP). This can be useful when
 analysing a pcap where you can see the username but not the password.
-Please note that an offline bruteforce is much more faster in this case.
+Please note that an offline bruteforce is much faster in this case.
 
 ### Options
 
@@ -226,9 +226,9 @@ If it works you should see big loads of memory coming in, otherwise you will onl
 
 ## udp-scanner
 
-If a TURN server allows UDP connections to targets this scanner can be used to scan all private ip ranges and send them
+If a TURN server allows UDP connections to internal targets this scanner can be used to scan all private ip ranges and send them
 SNMP and DNS requests. As this checks a lot of IPs this can take multiple days to complete so use with caution or
-specify smaller targets via the parameters. You need to supply a SNMP community string that will be tried and a domain
+specify smaller targets via the parameters. You need to supply an SNMP community string that will be tried and a domain
 name that will be resolved on each IP. For the domain name you can for example use burp collaborator.
 
 ### Options
@@ -286,9 +286,9 @@ First step is to get the required data. I suggest to launch Wireshark in the bac
 to collect all HTTP and Websocket traffic. Next search your burp history for some keywords related to TURN like `3478`,
 `password`, `credential` and `username` (be sure to also check the websocket tab for these keywords). This might reveal
 the turn server and the protocol (UDP and TCP endpoints might have different ports) and the credentials used to connect.
-If you can't find the data in burp start looking at wireshark to identify the traffic. If it's on a non standard port (
+If you can't find the data in burp start looking at wireshark to identify the traffic. If it's on a nonstandard port (
 anything else then 3478) decode the protocol in Wireshark via a right click as `STUN`. This should show you the username
-used to connect and you can use this information to search burps history even further for the required data. Please note
+used to connect, and you can use this information to search burps history even further for the required data. Please note
 that Wireshark can't show you the password as the password is used to hash some package contents so it can not be
 reversed.
 

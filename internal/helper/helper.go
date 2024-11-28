@@ -48,8 +48,7 @@ func IsPrivateIP(ip netip.Addr) bool {
 // numbers (16,383 possible values).
 func RandomChannelNumber() ([]byte, error) {
 	token := make([]byte, 2)
-	valid := false
-	for !valid {
+	for {
 		if _, err := cryptorand.Read(token); err != nil {
 			return nil, err
 		}

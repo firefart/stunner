@@ -35,7 +35,7 @@ jobs:
 
       - name: commit changes
         # need to override the default shell so we can check
-        # for error codes. Otherwise it will always fail if
+        # for error codes. Otherwise, it will always fail if
         # one command returns an error code other than 0
         shell: bash --noprofile --norc -o pipefail {0}
         run: |

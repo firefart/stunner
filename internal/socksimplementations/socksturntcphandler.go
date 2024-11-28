@@ -30,7 +30,7 @@ type SocksTurnTCPHandler struct {
 	nonce                  string
 }
 
-// PreHandler connects to the STUN server, sets the connection up and returns the data connections
+// Init connects to the STUN server, sets the connection up and returns the data connections
 func (s *SocksTurnTCPHandler) Init(ctx context.Context, request socks.Request) (context.Context, io.ReadWriteCloser, *socks.Error) {
 	var target netip.Addr
 	var err error
@@ -129,8 +129,8 @@ func (s *SocksTurnTCPHandler) ReadFromClient(ctx context.Context, client io.Read
 	for {
 		// anonymous func for defer
 		// this might not be the fastest, but it does the trick
-		// in this case the timeout is per buffer read/write to support long
-		// running downloads.
+		// in this case the timeout is per buffer read/write to support
+		// long-running downloads.
 		err := func() error {
 			timeOut := time.Now().Add(s.Timeout)
 
@@ -174,8 +174,8 @@ func (s *SocksTurnTCPHandler) ReadFromRemote(ctx context.Context, remote io.Read
 	for {
 		// anonymous func for defer
 		// this might not be the fastest, but it does the trick
-		// in this case the timeout is per buffer read/write to support long
-		// running downloads.
+		// in this case the timeout is per buffer read/write to support
+		// long-running downloads.
 		err := func() error {
 			timeOut := time.Now().Add(s.Timeout)
 
@@ -214,8 +214,8 @@ func (s *SocksTurnTCPHandler) ReadFromRemote(ctx context.Context, remote io.Read
 	}
 }
 
-// Cleanup closes the stored control connection
-func (s *SocksTurnTCPHandler) Close(ctx context.Context) error {
+// Close closes the stored control connection
+func (s *SocksTurnTCPHandler) Close(_ context.Context) error {
 	if s.ControlConnection != nil {
 		return s.ControlConnection.Close()
 	}

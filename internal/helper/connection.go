@@ -48,7 +48,8 @@ func connectionRead(ctx context.Context, r *bufio.Reader, maxSizeToRead *int, ti
 			if err != nil {
 				if err != io.EOF {
 					// also return read data on timeout so caller can use it
-					if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+					var netErr net.Error
+					if errors.As(err, &netErr) && netErr.Timeout() {
 						return ret, ErrTimeout
 					}
 					return nil, err
@@ -86,10 +87,9 @@ func ConnectionWrite(ctx context.Context, conn net.Conn, data []byte, timeout ti
 		default:
 			written, err = conn.Write(data[written:toWriteLeft])
 			if err != nil {
-				if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				var netErr net.Error
+				if errors.As(err, &netErr) && netErr.Timeout() {
 					return ErrTimeout
-				} else {
-					return err
 				}
 			}
 			if written == toWriteLeft {

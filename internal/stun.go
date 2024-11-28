@@ -56,7 +56,7 @@ func (s *Stun) String() string {
 
 // Serialize converts the object into a byte stream
 func (s *Stun) Serialize() ([]byte, error) {
-	// first start with the attributes so we can calculate the message length afterwards
+	// first start with the attributes so we can calculate the message length afterward
 	var attributes []byte
 	authenticated := false
 	for _, a := range s.Attributes {
