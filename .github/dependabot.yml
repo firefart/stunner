@@ -15,3 +15,13 @@ updates:
     schedule:
       # Check for updates to GitHub Actions every weekday
       interval: "daily"
+
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "devcontainers"
+    directory: "/"
+    schedule:
+      interval: "weekly"
