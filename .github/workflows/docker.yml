@@ -10,6 +10,7 @@ on:
 
 jobs:
   Dockerhub:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     permissions:
       contents: read

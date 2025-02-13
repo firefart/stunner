@@ -3,6 +3,7 @@ on: [ push, pull_request ]
 jobs:
   build:
     name: Build
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go
