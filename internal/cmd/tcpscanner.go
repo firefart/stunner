@@ -77,7 +77,7 @@ func TCPScanner(ctx context.Context, opts TCPScannerOpts) error {
 			port := strings.TrimSpace(port)
 			portI, err := strconv.ParseInt(port, 10, 16)
 			if err != nil {
-				return fmt.Errorf("Invalid port %s: %w", port, err)
+				return fmt.Errorf("invalid port %s: %w", port, err)
 			}
 			opts.Log.Debugf("Scanning %s:%d", ip.IP.String(), portI)
 			if err := httpScan(ctx, opts, ip.IP, uint16(portI)); err != nil {
@@ -97,11 +97,7 @@ func httpScan(ctx context.Context, opts TCPScannerOpts, ip netip.Addr, port uint
 	defer controlConnection.Close()
 	defer dataConnection.Close()
 
-	useTLS := false
-	if port == 443 || port == 8443 || port == 7443 || port == 8843 {
-		useTLS = true
-	}
-
+	useTLS := port == 443 || port == 8443 || port == 7443 || port == 8843
 	if useTLS {
 		tlsConn := tls.Client(dataConnection, &tls.Config{InsecureSkipVerify: true})
 		if err := helper.ConnectionWrite(ctx, tlsConn, []byte(httpRequest), opts.Timeout); err != nil {

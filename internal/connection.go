@@ -73,7 +73,7 @@ func (s *Stun) SendAndReceive(ctx context.Context, logger DebugLogger, conn net.
 	logger.Debugf("Sending\n%s", s.String())
 	err := s.send(ctx, conn, timeout)
 	if err != nil {
-		return nil, fmt.Errorf("Send: %w", err)
+		return nil, fmt.Errorf("SendAndReceive: %w", err)
 	}
 
 	// need this otherwise the read call is blocking forever

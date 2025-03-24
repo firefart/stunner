@@ -34,7 +34,7 @@ func IPIterator(ranges []string) <-chan IP {
 			} else {
 				tmp, err := netip.ParseAddr(ipRange)
 				if err != nil {
-					c <- IP{Error: fmt.Errorf("Invalid IP %s: %w", ipRange, err)}
+					c <- IP{Error: fmt.Errorf("invalid IP %s: %w", ipRange, err)}
 					continue
 				}
 				c <- IP{IP: tmp}

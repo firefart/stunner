@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	fingerprint = 0x5354554e // nolint:deadcode,unused
+	fingerprint = 0x5354554e // nolint:unused
 )
 
 // Align the uint16 number to the smallest multiple of 4, which is larger than
@@ -31,7 +31,7 @@ value of the attribute is computed as the CRC-32 of the STUN message
 up to (but excluding) the FINGERPRINT attribute itself, XOR'ed with
 the 32-bit value 0x5354554e
 */
-// nolint:deadcode,unused
+// nolint:unused
 func generateFingerprint(buf []byte) []byte {
 	crc := crc32.ChecksumIEEE(buf) ^ fingerprint
 	ret := make([]byte, 4)

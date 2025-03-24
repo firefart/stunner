@@ -13,7 +13,7 @@ const (
 	messageIntegritySize = 20
 )
 
-// nolint:deadcode,varcheck,unused
+// nolint:unused
 const fingerPrintSize = 4
 
 // MagicCookie is the fixed value according to the rfc
@@ -384,7 +384,7 @@ const (
 	ErrorServerError ErrorCode = 500
 )
 
-// nolint:deadcode,varcheck,unused
+// nolint:unused
 var StunErrorNames = map[ErrorCode]string{
 	ErrorTryAlternate:               "Try Alternate",
 	ErrorBadRequest:                 "Bad Request",
