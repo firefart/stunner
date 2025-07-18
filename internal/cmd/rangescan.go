@@ -25,22 +25,22 @@ type RangeScanOpts struct {
 
 func (opts RangeScanOpts) Validate() error {
 	if opts.TurnServer == "" {
-		return fmt.Errorf("need a valid turnserver")
+		return errors.New("need a valid turnserver")
 	}
 	if !strings.Contains(opts.TurnServer, ":") {
-		return fmt.Errorf("turnserver needs a port")
+		return errors.New("turnserver needs a port")
 	}
 	if opts.Protocol != "tcp" && opts.Protocol != "udp" {
-		return fmt.Errorf("protocol needs to be either tcp or udp")
+		return errors.New("protocol needs to be either tcp or udp")
 	}
 	if opts.Username == "" {
-		return fmt.Errorf("please supply a username")
+		return errors.New("please supply a username")
 	}
 	if opts.Password == "" {
-		return fmt.Errorf("please supply a password")
+		return errors.New("please supply a password")
 	}
 	if opts.Log == nil {
-		return fmt.Errorf("please supply a valid logger")
+		return errors.New("please supply a valid logger")
 	}
 
 	return nil
@@ -151,7 +151,7 @@ func scanTCP(ctx context.Context, opts RangeScanOpts, targetHost netip.Addr, tar
 		return false, fmt.Errorf("error on sending allocate request 1: %w", err)
 	}
 	if allocateResponse.Header.MessageType.Class != internal.MsgTypeClassError {
-		return false, fmt.Errorf("MessageClass is not Error (should be not authenticated)")
+		return false, errors.New("MessageClass is not Error (should be not authenticated)")
 	}
 
 	realm := string(allocateResponse.GetAttribute(internal.AttrRealm).Value)

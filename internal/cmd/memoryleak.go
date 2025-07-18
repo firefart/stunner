@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/netip"
 	"strings"
@@ -27,31 +28,31 @@ type MemoryleakOpts struct {
 
 func (opts MemoryleakOpts) Validate() error {
 	if opts.TurnServer == "" {
-		return fmt.Errorf("need a valid turnserver")
+		return errors.New("need a valid turnserver")
 	}
 	if !strings.Contains(opts.TurnServer, ":") {
-		return fmt.Errorf("turnserver needs a port")
+		return errors.New("turnserver needs a port")
 	}
 	if opts.Protocol != "tcp" && opts.Protocol != "udp" {
-		return fmt.Errorf("protocol needs to be either tcp or udp")
+		return errors.New("protocol needs to be either tcp or udp")
 	}
 	if opts.Username == "" {
-		return fmt.Errorf("please supply a username")
+		return errors.New("please supply a username")
 	}
 	if opts.Password == "" {
-		return fmt.Errorf("please supply a password")
+		return errors.New("please supply a password")
 	}
 	if opts.Log == nil {
-		return fmt.Errorf("please supply a valid logger")
+		return errors.New("please supply a valid logger")
 	}
 	if !opts.TargetHost.IsValid() {
-		return fmt.Errorf("please supply a valid target host (must be an ip)")
+		return errors.New("please supply a valid target host (must be an ip)")
 	}
 	if opts.TargetPort <= 0 {
-		return fmt.Errorf("please supply a valid target port")
+		return errors.New("please supply a valid target port")
 	}
 	if opts.Size <= 0 {
-		return fmt.Errorf("please supply a valid size")
+		return errors.New("please supply a valid size")
 	}
 
 	return nil
@@ -86,7 +87,7 @@ func MemoryLeak(ctx context.Context, opts MemoryleakOpts) error {
 		return fmt.Errorf("error on sending ChannelBind request: %s", channelBindResponse.GetErrorString())
 	}
 
-	for i := 0; i < 1000; i++ {
+	for i := range 1000 {
 		var toSend []byte
 		toSend = append(toSend, channelNumber...)
 		toSend = append(toSend, helper.PutUint16(opts.Size)...)

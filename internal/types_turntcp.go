@@ -9,7 +9,7 @@ const (
 	MsgTypeMethodConnectionAttempt MessageTypeMethod = 0x0c
 )
 
-var turnTCPMsgTypeMethodNames = map[MessageTypeMethod]string{
+var turnTCPMsgTypeMethodNames = map[MessageTypeMethod]string{ // nolint:exhaustive
 	MsgTypeMethodConnect:           "Connect",
 	MsgTypeMethodConnectionBind:    "ConnectionBind",
 	MsgTypeMethodConnectionAttempt: "ConnectionAttempt",
@@ -20,7 +20,7 @@ const (
 	AttrConnectionID AttributeType = 0x002a
 )
 
-var turnTCPAttrNames = map[AttributeType]string{
+var turnTCPAttrNames = map[AttributeType]string{ // nolint:exhaustive
 	AttrConnectionID: "CONNECTION-ID",
 }
 
@@ -31,7 +31,7 @@ const (
 	ErrorConnectionTimeoutOrFailure ErrorCode = 447
 )
 
-var TurnTCPErrorNames = map[ErrorCode]string{
+var TurnTCPErrorNames = map[ErrorCode]string{ // nolint:exhaustive
 	ErrorConnectionAlreadyExists:    "Connection Already Exists",
 	ErrorConnectionTimeoutOrFailure: "Connection Timeout or Failure",
 }

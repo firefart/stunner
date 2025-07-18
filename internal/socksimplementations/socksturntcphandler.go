@@ -143,13 +143,13 @@ func (s *SocksTurnTCPHandler) ReadFromClient(ctx context.Context, client io.Read
 			default:
 				if c, ok := remote.(writeDeadline); ok {
 					if err := c.SetWriteDeadline(timeOut); err != nil {
-						return fmt.Errorf("could not set write deadline on remote: %v", err)
+						return fmt.Errorf("could not set write deadline on remote: %w", err)
 					}
 				}
 
 				if c, ok := client.(readDeadline); ok {
 					if err := c.SetReadDeadline(timeOut); err != nil {
-						return fmt.Errorf("could not set read deadline on client: %v", err)
+						return fmt.Errorf("could not set read deadline on client: %w", err)
 					}
 				}
 
@@ -188,13 +188,13 @@ func (s *SocksTurnTCPHandler) ReadFromRemote(ctx context.Context, remote io.Read
 			default:
 				if c, ok := client.(writeDeadline); ok {
 					if err := c.SetWriteDeadline(timeOut); err != nil {
-						return fmt.Errorf("could not set write deadline on client: %v", err)
+						return fmt.Errorf("could not set write deadline on client: %w", err)
 					}
 				}
 
 				if c, ok := remote.(readDeadline); ok {
 					if err := c.SetReadDeadline(timeOut); err != nil {
-						return fmt.Errorf("could not set read deadline on remote: %v", err)
+						return fmt.Errorf("could not set read deadline on remote: %w", err)
 					}
 				}
 

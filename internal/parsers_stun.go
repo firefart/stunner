@@ -51,7 +51,7 @@ func parseSTUNMessageType(msgType []byte) MessageType {
 	//        --> 0000 0000 0000 0011 --> 3
 	method := (buf & 0x000F) | ((buf & 0x00E0) >> 1) | ((buf & 0x3E00) >> 2)
 	return MessageType{
-		Class:  MessageTypeClass(class),
+		Class:  MessageTypeClass(class), // nolint:gosec
 		Method: MessageTypeMethod(method),
 	}
 }

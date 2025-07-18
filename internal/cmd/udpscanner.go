@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"net/netip"
 	"strings"
 	"time"
@@ -29,28 +29,28 @@ type UDPScannerOpts struct {
 
 func (opts UDPScannerOpts) Validate() error {
 	if opts.TurnServer == "" {
-		return fmt.Errorf("need a valid turnserver")
+		return errors.New("need a valid turnserver")
 	}
 	if !strings.Contains(opts.TurnServer, ":") {
-		return fmt.Errorf("turnserver needs a port")
+		return errors.New("turnserver needs a port")
 	}
 	if opts.Protocol != "tcp" && opts.Protocol != "udp" {
-		return fmt.Errorf("protocol needs to be either tcp or udp")
+		return errors.New("protocol needs to be either tcp or udp")
 	}
 	if opts.Username == "" {
-		return fmt.Errorf("please supply a username")
+		return errors.New("please supply a username")
 	}
 	if opts.Password == "" {
-		return fmt.Errorf("please supply a password")
+		return errors.New("please supply a password")
 	}
 	if opts.Log == nil {
-		return fmt.Errorf("please supply a valid logger")
+		return errors.New("please supply a valid logger")
 	}
 	if opts.CommunityString == "" {
-		return fmt.Errorf("please supply a valid community string")
+		return errors.New("please supply a valid community string")
 	}
 	if opts.DomainName == "" {
-		return fmt.Errorf("please supply a valid domain name")
+		return errors.New("please supply a valid domain name")
 	}
 	// no need to check IPs, it can be nil
 
@@ -125,27 +125,27 @@ func snmpScan(ctx context.Context, opts UDPScannerOpts, ip netip.Addr, port uint
 	// 4 - some random stuff
 	inner = append(inner, 0x04)
 	// length of community string
-	inner = append(inner, uint8(len(community)))
+	inner = append(inner, uint8(len(community))) // nolint: gosec
 	// community string
 	inner = append(inner, []byte(community)...)
 	// get-next 1.3.6.1.2.1
 	inner = append(inner, []byte{0xa1, 0x19, 0x02, 0x04}...)
 	// request ID
-	inner = append(inner, helper.PutUint32(rand.Uint32())...)
+	inner = append(inner, helper.PutUint32(rand.Uint32())...) // nolint: gosec
 	// rest
 	inner = append(inner, 0x02, 0x01, 0x00, 0x02, 0x01, 0x00, 0x30, 0x0b, 0x30, 0x09, 0x06, 0x05, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x05, 0x00)
 
 	// Sequence
 	snmp = append(snmp, 0x30)
 	// Overall Length
-	snmp = append(snmp, uint8(len(inner)))
+	snmp = append(snmp, uint8(len(inner))) // nolint: gosec
 	snmp = append(snmp, inner...)
 
 	snmpLen := len(snmp)
 
 	var buf []byte
 	buf = append(buf, channelNumber...)
-	buf = append(buf, helper.PutUint16(uint16(snmpLen))...)
+	buf = append(buf, helper.PutUint16(uint16(snmpLen))...) // nolint: gosec
 	buf = append(buf, snmp...)
 
 	err = helper.ConnectionWrite(ctx, remote, buf, opts.Timeout)
@@ -205,7 +205,7 @@ func dnsScan(ctx context.Context, opts UDPScannerOpts, ip netip.Addr, port uint1
 	var dns []byte
 
 	// transactionID
-	dns = append(dns, helper.PutUint16(uint16(rand.Uint32()))...)
+	dns = append(dns, helper.PutUint16(uint16(rand.Uint32()))...) // nolint: gosec
 	// FLAGS: standard query
 	dns = append(dns, []byte{0x01, 0x00}...)
 	// Questions: 1
@@ -221,7 +221,7 @@ func dnsScan(ctx context.Context, opts UDPScannerOpts, ip netip.Addr, port uint1
 	domainParts := strings.Split(dnsName, ".")
 	var domainBuf []byte
 	for _, x := range domainParts {
-		domainBuf = append(domainBuf, uint8(len(x)))
+		domainBuf = append(domainBuf, uint8(len(x))) // nolint: gosec
 		domainBuf = append(domainBuf, []byte(x)...)
 	}
 	// terminate with a null byte
@@ -237,7 +237,7 @@ func dnsScan(ctx context.Context, opts UDPScannerOpts, ip netip.Addr, port uint1
 
 	var buf []byte
 	buf = append(buf, channelNumber...)
-	buf = append(buf, helper.PutUint16(uint16(dnsLen))...)
+	buf = append(buf, helper.PutUint16(uint16(dnsLen))...) // nolint: gosec
 	buf = append(buf, dns...)
 
 	err = helper.ConnectionWrite(ctx, remote, buf, opts.Timeout)

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/netip"
@@ -46,7 +47,7 @@ func SetupTurnTCPConnection(ctx context.Context, logger DebugLogger, turnServer 
 		return "", "", nil, nil, fmt.Errorf("error on sending allocate request 1: %w", err)
 	}
 	if allocateResponse.Header.MessageType.Class != MsgTypeClassError {
-		return "", "", nil, nil, fmt.Errorf("MessageClass is not Error (should be not authenticated)")
+		return "", "", nil, nil, errors.New("MessageClass is not Error (should be not authenticated)")
 	}
 
 	realm := string(allocateResponse.GetAttribute(AttrRealm).Value)

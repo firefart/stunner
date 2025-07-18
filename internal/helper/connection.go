@@ -16,7 +16,7 @@ var ErrTimeout = errors.New("timeout occurred. you can try to increase the timeo
 func ConnectionReadAll(ctx context.Context, conn net.Conn, timeout time.Duration) ([]byte, error) {
 	// need this otherwise the read call is blocking forever
 	if err := conn.SetReadDeadline(time.Now().Add(timeout)); err != nil {
-		return nil, fmt.Errorf("could not set read deadline: %v", err)
+		return nil, fmt.Errorf("could not set read deadline: %w", err)
 	}
 	return connectionRead(ctx, bufio.NewReader(conn), nil, timeout)
 }
@@ -77,7 +77,7 @@ func ConnectionWrite(ctx context.Context, conn net.Conn, data []byte, timeout ti
 
 	// need this otherwise the read call is blocking forever
 	if err := conn.SetWriteDeadline(time.Now().Add(timeout)); err != nil {
-		return fmt.Errorf("could not set write deadline: %v", err)
+		return fmt.Errorf("could not set write deadline: %w", err)
 	}
 
 	for {

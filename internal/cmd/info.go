@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -21,16 +22,16 @@ type InfoOpts struct {
 
 func (opts InfoOpts) Validate() error {
 	if opts.TurnServer == "" {
-		return fmt.Errorf("need a valid turnserver")
+		return errors.New("need a valid turnserver")
 	}
 	if !strings.Contains(opts.TurnServer, ":") {
-		return fmt.Errorf("turnserver needs a port")
+		return errors.New("turnserver needs a port")
 	}
 	if opts.Protocol != "tcp" && opts.Protocol != "udp" {
-		return fmt.Errorf("protocol needs to be either tcp or udp")
+		return errors.New("protocol needs to be either tcp or udp")
 	}
 	if opts.Log == nil {
-		return fmt.Errorf("please supply a valid logger")
+		return errors.New("please supply a valid logger")
 	}
 
 	return nil
@@ -100,7 +101,7 @@ func testTurn(ctx context.Context, opts InfoOpts, proto internal.RequestedTransp
 		return nil, fmt.Errorf("error on sending allocate request: %w", err)
 	}
 	if allocateResponse.Header.MessageType.Class != internal.MsgTypeClassError {
-		return nil, fmt.Errorf("MessageClass is not Error (should be not authenticated)")
+		return nil, errors.New("MessageClass is not Error (should be not authenticated)")
 	}
 
 	return allocateResponse.Attributes, nil

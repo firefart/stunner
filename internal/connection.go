@@ -30,7 +30,7 @@ func Connect(ctx context.Context, protocol string, turnServer string, useTLS boo
 			Timeout: timeout,
 		}
 		conn, err := tls.DialWithDialer(&d, protocol, turnServer, &tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: true, // nolint:gosec
 		})
 		if err != nil {
 			return nil, fmt.Errorf("error on establishing a TLS connection to the server: %w", err)
@@ -78,7 +78,7 @@ func (s *Stun) SendAndReceive(ctx context.Context, logger DebugLogger, conn net.
 
 	// need this otherwise the read call is blocking forever
 	if err := conn.SetReadDeadline(time.Now().Add(timeout)); err != nil {
-		return nil, fmt.Errorf("could not set read deadline: %v", err)
+		return nil, fmt.Errorf("could not set read deadline: %w", err)
 	}
 
 	r := bufio.NewReader(conn)

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"strconv"
 
 	"github.com/firefart/stunner/internal/helper"
 )
@@ -119,7 +120,7 @@ const (
 	MsgTypeMethodBinding MessageTypeMethod = 0x01
 )
 
-var msgTypeMethodNames = map[MessageTypeMethod]string{
+var msgTypeMethodNames = map[MessageTypeMethod]string{ // nolint:exhaustive
 	MsgTypeMethodBinding: "Binding",
 }
 
@@ -143,9 +144,9 @@ type Attribute struct {
 }
 
 func (a *Attribute) String(transactionID string) string {
-	value := ""
+	var value string
 	attrType := AttributeTypeString(a.Type)
-	switch a.Type {
+	switch a.Type { // nolint:exhaustive
 	// STUN
 	case AttrMappedAddress:
 		value = string(a.Value)
@@ -177,7 +178,7 @@ func (a *Attribute) String(transactionID string) string {
 	case AttrChannelNumber:
 		value = string(a.Value)
 	case AttrLifetime:
-		value = fmt.Sprintf("%d", binary.BigEndian.Uint32(a.Value))
+		value = strconv.FormatUint(binary.BigEndian.Uint64(a.Value), 10)
 	case AttrBandwidth:
 		value = string(a.Value)
 	case AttrXorPeerAddress:
@@ -221,7 +222,7 @@ func (a *Attribute) String(transactionID string) string {
 // Serialize returns the byte slice representation of an attribute
 func (a *Attribute) Serialize() []byte {
 	if a.Length == 0 {
-		a.Length = uint16(len(a.Value))
+		a.Length = uint16(len(a.Value)) // nolint:gosec
 	}
 
 	var buf []byte
@@ -275,7 +276,7 @@ const (
 	AttrOtherAddress   AttributeType = 0x802c
 )
 
-var attrNames = map[AttributeType]string{
+var attrNames = map[AttributeType]string{ // nolint:exhaustive
 	AttrMappedAddress:          "MAPPED-ADDRESS",
 	AttrUsername:               "USERNAME",
 	AttrMessageIntegrity:       "MESSAGE-INTEGRITY",
@@ -316,7 +317,7 @@ func ParseError(buf []byte) Error {
 	errorCode := int(buf[2])*100 + int(buf[3])
 	errorText := buf[4:]
 	return Error{
-		ErrorCode: ErrorCode(errorCode),
+		ErrorCode: ErrorCode(errorCode), // nolint:gosec
 		ErrorText: string(bytes.Trim(errorText, "\x00")),
 	}
 }
@@ -385,7 +386,7 @@ const (
 )
 
 // nolint:unused
-var StunErrorNames = map[ErrorCode]string{
+var StunErrorNames = map[ErrorCode]string{ // nolint:exhaustive
 	ErrorTryAlternate:               "Try Alternate",
 	ErrorBadRequest:                 "Bad Request",
 	ErrorUnauthorized:               "Unauthorized",

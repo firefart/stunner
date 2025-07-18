@@ -3,7 +3,7 @@ package helper
 import (
 	cryptorand "crypto/rand"
 	"encoding/binary"
-	"math/rand"
+	"math/rand/v2"
 	"net/netip"
 	"unicode"
 )
@@ -27,7 +27,7 @@ func RandomString(length int) string {
 	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, length)
 	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+		b[i] = letterRunes[rand.IntN(len(letterRunes))] // nolint: gosec
 	}
 	return string(b)
 }

@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -24,22 +25,22 @@ type BruteforceOpts struct {
 
 func (opts BruteforceOpts) Validate() error {
 	if opts.TurnServer == "" {
-		return fmt.Errorf("need a valid turnserver")
+		return errors.New("need a valid turnserver")
 	}
 	if !strings.Contains(opts.TurnServer, ":") {
-		return fmt.Errorf("turnserver needs a port")
+		return errors.New("turnserver needs a port")
 	}
 	if opts.Protocol != "tcp" && opts.Protocol != "udp" {
-		return fmt.Errorf("protocol needs to be either tcp or udp")
+		return errors.New("protocol needs to be either tcp or udp")
 	}
 	if opts.Username == "" {
-		return fmt.Errorf("please supply a username")
+		return errors.New("please supply a username")
 	}
 	if opts.Passfile == "" {
-		return fmt.Errorf("please supply a password file")
+		return errors.New("please supply a password file")
 	}
 	if opts.Log == nil {
-		return fmt.Errorf("please supply a valid logger")
+		return errors.New("please supply a valid logger")
 	}
 	return nil
 }
@@ -81,7 +82,7 @@ func testPassword(ctx context.Context, opts BruteforceOpts, password string) err
 		return fmt.Errorf("error on sending AllocateRequest: %w", err)
 	}
 	if allocateResponse.Header.MessageType.Class != internal.MsgTypeClassError {
-		return fmt.Errorf("MessageClass is not Error (should be not authenticated)")
+		return errors.New("MessageClass is not Error (should be not authenticated)")
 	}
 
 	realm := string(allocateResponse.GetAttribute(internal.AttrRealm).Value)

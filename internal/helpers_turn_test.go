@@ -32,7 +32,6 @@ func TestConvertXORAddr(t *testing.T) {
 		{"000121422112a442", "ASDF", "0.0.0.0", 80},
 	}
 	for _, tt := range tests {
-		tt := tt // NOTE: https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 		t.Run(tt.input, func(t *testing.T) {
 			t.Parallel()
 			in, err := hex.DecodeString(tt.input)

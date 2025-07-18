@@ -3,7 +3,7 @@ package helper
 import "testing"
 
 func TestRandomChannelNumber(t *testing.T) {
-	for i := 0; i < 1000; i++ {
+	for range 1000 {
 		channel, err := RandomChannelNumber()
 		if err != nil {
 			t.Fatal(err)

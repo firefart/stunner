@@ -2,7 +2,6 @@ package internal
 
 import (
 	"encoding/hex"
-	"fmt"
 	"testing"
 )
 
@@ -21,7 +20,6 @@ func TestFromBytes(t *testing.T) {
 		{"Connect Response", "010a00202112a442cf513b99ab329be6bb1a7d3e002a000435d8cb0d000800143519a43cda074bbbb61ac44342a0618ee9583817"},
 	}
 	for _, tt := range tests {
-		tt := tt // NOTE: https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 		t.Run(tt.testName, func(t *testing.T) {
 			t.Parallel()
 			in, err := hex.DecodeString(tt.input)
@@ -32,7 +30,7 @@ func TestFromBytes(t *testing.T) {
 			if err != nil {
 				t.Fatalf("could not parse paket: %v", err)
 			}
-			fmt.Printf("%+v\n", s)
+			t.Logf("%+v\n", s)
 			if s.Header.TransactionID == "" {
 				t.Fatal("transaction id is empty")
 			}
@@ -53,7 +51,6 @@ func TestFromBytesFail(t *testing.T) {
 		{"Fails on an invalid message (invalid attribute size)", "01130aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
 	}
 	for _, tt := range tests {
-		tt := tt // NOTE: https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 		t.Run(tt.testName, func(t *testing.T) {
 			t.Parallel()
 			in, err := hex.DecodeString(tt.input)

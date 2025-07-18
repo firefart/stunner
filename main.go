@@ -13,6 +13,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/netip"
@@ -191,7 +192,7 @@ func main() {
 
 					targetString := c.String("target")
 					if targetString == "" || !strings.Contains(targetString, ":") {
-						return fmt.Errorf("please supply a valid target")
+						return errors.New("please supply a valid target")
 					}
 					targetHost, port, err := net.SplitHostPort(targetString)
 					if err != nil {
@@ -217,7 +218,7 @@ func main() {
 						Password:   password,
 						TargetHost: targetIP,
 						TargetPort: uint16(targetPort),
-						Size:       uint16(size),
+						Size:       uint16(size), // nolint:gosec
 					})
 				},
 			},
@@ -405,10 +406,10 @@ func main() {
 				Action: func(ctx *cli.Context) error {
 					info, ok := debug.ReadBuildInfo()
 					if !ok {
-						return fmt.Errorf("could not get buildinfo")
+						return errors.New("could not get buildinfo")
 					}
-					fmt.Printf("Build info:\n")
-					fmt.Printf("%s", info)
+					fmt.Printf("Build info:\n") // nolint:forbidigo
+					fmt.Printf("%s", info)      // nolint:forbidigo
 					return nil
 				},
 			},

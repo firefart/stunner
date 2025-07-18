@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"net"
 	"net/netip"
@@ -15,7 +16,7 @@ import (
 func xor(content, key []byte) []byte {
 	var buf []byte
 	index := 0
-	for i := 0; i < len(content); i++ {
+	for i := range content {
 		if index >= len(key) {
 			index = 0
 		}
@@ -38,15 +39,15 @@ func xor(content, key []byte) []byte {
 //	        Figure 6: Format of XOR-MAPPED-ADDRESS Attribute
 func xorAddr(ip netip.Addr, port uint16, transactionID []byte) ([]byte, error) {
 	var family uint16
-	var key []byte
+	var key = MagicCookie
 
-	if ip.Is6() {
+	switch {
+	case ip.Is6():
 		family = uint16(0x02)
-		key = append(MagicCookie, transactionID...)
-	} else if ip.Is4() {
+		key = append(key, transactionID...)
+	case ip.Is4():
 		family = uint16(0x01)
-		key = MagicCookie
-	} else {
+	default:
 		return nil, fmt.Errorf("invalid IP address %02x", ip)
 	}
 
@@ -108,9 +109,9 @@ func ConvertXORAddr(input []byte, transactionID string) (string, uint16, error) 
 	key := MagicCookie
 	switch family[1] {
 	case 0x01:
-		key = MagicCookie
+		// IPv4, nothing to do
 	case 0x02:
-		key = append(MagicCookie, transactionID...)
+		key = append(key, transactionID...)
 	}
 
 	host := xor(payload, key)
@@ -145,7 +146,7 @@ func SetupTurnConnection(ctx context.Context, logger DebugLogger, connectProtoco
 		return nil, "", "", fmt.Errorf("error on sending AllocateRequest: %w", err)
 	}
 	if allocateResponse.Header.MessageType.Class != MsgTypeClassError {
-		return nil, "", "", fmt.Errorf("MessageClass is not Error (should be not authenticated)")
+		return nil, "", "", errors.New("MessageClass is not Error (should be not authenticated)")
 	}
 
 	realm := string(allocateResponse.GetAttribute(AttrRealm).Value)

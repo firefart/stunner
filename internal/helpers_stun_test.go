@@ -20,7 +20,6 @@ func TestPadding(t *testing.T) {
 		{"Does not pad a 32 byte string", 32, 32},
 	}
 	for _, tt := range tests {
-		tt := tt // NOTE: https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 		t.Run(tt.testName, func(t *testing.T) {
 			t.Parallel()
 			input := bytes.Repeat([]byte{1}, tt.inputLen)

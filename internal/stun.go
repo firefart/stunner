@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -83,11 +84,11 @@ func (s *Stun) Serialize() ([]byte, error) {
 	var buf []byte
 	buf = append(buf, s.Header.MessageType.Serialize()...)
 	// Length
-	buf = append(buf, helper.PutUint16(uint16(len(attributes)))...)
+	buf = append(buf, helper.PutUint16(uint16(len(attributes)))...) // nolint:gosec
 	// MagicCookie
 	buf = append(buf, MagicCookie...)
 	if s.Header.TransactionID == "" {
-		return nil, fmt.Errorf("missing transaction ID")
+		return nil, errors.New("missing transaction ID")
 	}
 	buf = append(buf, s.Header.TransactionID...)
 

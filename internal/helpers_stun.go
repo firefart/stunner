@@ -2,8 +2,8 @@ package internal
 
 import (
 	"crypto/hmac"
-	"crypto/md5"
-	"crypto/sha1"
+	"crypto/md5"  // nolint: gosec
+	"crypto/sha1" // nolint: gosec
 	"encoding/binary"
 	"fmt"
 	"hash/crc32"
@@ -21,7 +21,7 @@ func align(n uint16) uint16 {
 
 // Padding handles the padding required for STUN packets
 func Padding(bytes []byte) []byte {
-	length := uint16(len(bytes))
+	length := uint16(len(bytes)) // nolint:gosec
 	return append(bytes, make([]byte, align(length)-length)...)
 }
 
@@ -43,7 +43,7 @@ func calculateMessageIntegrity(buf []byte, username, realm, password string) ([]
 	// key = MD5(username ":" realm ":" SASLprep(password))
 	key := fmt.Sprintf("%s:%s:%s", username, realm, password)
 	// key := password
-	md := md5.New()
+	md := md5.New() // nolint: gosec
 	if _, err := md.Write([]byte(key)); err != nil {
 		return nil, err
 	}

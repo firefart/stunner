@@ -61,7 +61,7 @@ const (
 	MsgTypeMethodChannelbind      MessageTypeMethod = 0x09
 )
 
-var turnMsgTypeMethodNames = map[MessageTypeMethod]string{
+var turnMsgTypeMethodNames = map[MessageTypeMethod]string{ // nolint:exhaustive
 	MsgTypeMethodAllocate:         "Allocate",
 	MsgTypeMethodRefresh:          "Refresh",
 	MsgTypeMethodChannelbind:      "Channel-Bind",
@@ -84,7 +84,7 @@ const (
 	AttrReservationToken   AttributeType = 0x0022
 )
 
-var turnAttrNames = map[AttributeType]string{
+var turnAttrNames = map[AttributeType]string{ // nolint:exhaustive
 	AttrChannelNumber:      "CHANNEL-NUMBER",
 	AttrLifetime:           "LIFETIME",
 	AttrBandwidth:          "BANDWIDTH",
@@ -107,7 +107,7 @@ const (
 	ErrorInsufficientCapacity         ErrorCode = 508
 )
 
-var TurnErrorNames = map[ErrorCode]string{
+var TurnErrorNames = map[ErrorCode]string{ // nolint:exhaustive
 	ErrorForbidden:                    "Forbidden",
 	ErrorAllocationMismatch:           "Allocation Mismatch",
 	ErrorWrongCredentials:             "Wrong Credentials",
