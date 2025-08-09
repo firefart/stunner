@@ -16,7 +16,10 @@ import (
 func Connect(ctx context.Context, protocol string, turnServer string, useTLS bool, timeout time.Duration) (net.Conn, error) {
 	if !useTLS {
 		// non TLS connection
-		conn, err := net.DialTimeout(protocol, turnServer, timeout)
+		dialer := &net.Dialer{
+			Timeout: timeout,
+		}
+		conn, err := dialer.DialContext(ctx, protocol, turnServer)
 		if err != nil {
 			return nil, fmt.Errorf("error on establishing a connection to the server: %w", err)
 		}
@@ -26,18 +29,24 @@ func Connect(ctx context.Context, protocol string, turnServer string, useTLS boo
 	// if we reach here we have a TLS connection
 	switch protocol {
 	case "tcp":
-		d := net.Dialer{
-			Timeout: timeout,
+		tlsDialer := &tls.Dialer{
+			NetDialer: &net.Dialer{
+				Timeout: timeout,
+			},
+			Config: &tls.Config{
+				InsecureSkipVerify: true, // nolint:gosec
+			},
 		}
-		conn, err := tls.DialWithDialer(&d, protocol, turnServer, &tls.Config{
-			InsecureSkipVerify: true, // nolint:gosec
-		})
+		conn, err := tlsDialer.DialContext(ctx, protocol, turnServer)
 		if err != nil {
 			return nil, fmt.Errorf("error on establishing a TLS connection to the server: %w", err)
 		}
 		return conn, nil
 	case "udp":
-		conn, err := net.DialTimeout(protocol, turnServer, timeout)
+		dialer := &net.Dialer{
+			Timeout: timeout,
+		}
+		conn, err := dialer.DialContext(ctx, protocol, turnServer)
 		if err != nil {
 			return nil, fmt.Errorf("error on establishing a connection to the server: %w", err)
 		}
