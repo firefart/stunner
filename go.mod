@@ -1,6 +1,6 @@
 module github.com/firefart/stunner
 
-go 1.24
+go 1.25
 
 require (
 	github.com/firefart/gosocks v0.4.2
