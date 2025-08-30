@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: "0 12 * * *"
 
+permissions:
+  contents: write
+
 jobs:
   update:
     timeout-minutes: 30
@@ -12,8 +15,6 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v5
-        with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN_UPDATE }}
 
       - name: Set up Go
         uses: actions/setup-go@v5
