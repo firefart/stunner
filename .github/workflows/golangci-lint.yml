@@ -1,5 +1,7 @@
 name: golangci-lint
 on: [ push, workflow_dispatch ]
+permissions:
+  contents: read
 jobs:
   golangci:
     name: lint
