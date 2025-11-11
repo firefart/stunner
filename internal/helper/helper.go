@@ -52,8 +52,7 @@ func RandomChannelNumber() ([]byte, error) {
 		if _, err := cryptorand.Read(token); err != nil {
 			return nil, err
 		}
-		if token[0] >= 0x40 &&
-			token[0] <= 0x7f {
+		if token[0] >= 0x40 && token[0] <= 0x7f { // nolint: gosec
 			break
 		}
 	}

@@ -50,7 +50,7 @@ func (s *Stun) String() string {
 	str += fmt.Sprintf("\tMessage Transaction ID: %02x\n", s.Header.TransactionID)
 	str += "Attributes\n"
 	for _, a := range s.Attributes {
-		str += fmt.Sprintf("\t%s\n", a.String(s.Header.TransactionID))
+		str += fmt.Sprintf("\t%s\n", a.String(s.Header.TransactionID)) // nolint: perfsprint
 	}
 	return strings.TrimSpace(str)
 }
