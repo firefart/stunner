@@ -5,7 +5,7 @@ go 1.25
 require (
 	github.com/firefart/gosocks v0.4.2
 	github.com/pion/dtls/v2 v2.2.12
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/urfave/cli/v2 v2.27.7
 )
 
