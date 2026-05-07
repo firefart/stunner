@@ -13,8 +13,11 @@ func ExtractChannelData(buf []byte) ([]byte, []byte, error) {
 	channelNumber := buf[:2]
 	dataLength := binary.BigEndian.Uint16(buf[2:4])
 	data := buf[4:]
-	if int(dataLength) != len(data) {
-		return nil, nil, fmt.Errorf("reported len %d different from sent length %d", dataLength, len(data))
+	// RFC 5766 §11.5: ChannelData is padded to a 4-byte boundary on both UDP and
+	// TCP. The LENGTH field reflects only the application data, not the padding,
+	// so len(data) may exceed dataLength by 0-3 bytes.
+	if int(dataLength) > len(data) {
+		return nil, nil, fmt.Errorf("reported len %d greater than available data %d", dataLength, len(data))
 	}
-	return channelNumber, data, nil
+	return channelNumber, data[:dataLength], nil
 }

@@ -43,6 +43,14 @@ func TestExtractChannelData(t *testing.T) {
 			wantChannel: []byte{0x40, 0x01},
 			wantData:    []byte{},
 		},
+		{
+			// RFC 5766 §11.5: ChannelData padded to 4-byte boundary; LENGTH reflects
+			// actual data length, not padding — trailing padding bytes must be accepted.
+			name:        "valid packet with RFC padding",
+			input:       []byte{0x40, 0x01, 0x00, 0x03, 0xDE, 0xAD, 0xBE, 0x00},
+			wantChannel: []byte{0x40, 0x01},
+			wantData:    []byte{0xDE, 0xAD, 0xBE},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -180,7 +180,12 @@ func (a *Attribute) String(transactionID string) string {
 		value = fmt.Sprintf("%02x", a.Value)
 	// TURN
 	case AttrChannelNumber:
-		value = string(a.Value)
+		if len(a.Value) < 2 {
+			value = "invalid"
+			break
+		}
+		chanNum := binary.BigEndian.Uint16(a.Value[:2])
+		value = fmt.Sprintf("0x%04x", chanNum)
 	case AttrLifetime:
 		if len(a.Value) < 4 {
 			value = "invalid"
@@ -198,19 +203,29 @@ func (a *Attribute) String(transactionID string) string {
 		host, port, _ := ConvertXORAddr(a.Value, transactionID)
 		value = fmt.Sprintf("%02x (%s:%d)", a.Value, host, port)
 	case AttrEvenPort:
-		value = string(a.Value)
-	case AttrRequestedTransport:
-		if len(a.Value) < 2 {
+		if len(a.Value) < 1 {
 			value = "invalid"
 			break
 		}
-		value = RequestedTransportString(RequestedTransport(binary.LittleEndian.Uint16(a.Value)))
+		// RFC 5766 §14.6: R bit (MSB of first byte) requests reservation of next port
+		if a.Value[0]&0x80 != 0 {
+			value = "R=1"
+		} else {
+			value = "R=0"
+		}
+	case AttrRequestedTransport:
+		// RFC 5766 §14.7: first byte is protocol; remaining 3 bytes are reserved
+		if len(a.Value) < 4 {
+			value = "invalid"
+			break
+		}
+		value = RequestedTransportString(RequestedTransport(a.Value[0]))
 	case AttrDontFragment:
 		value = string(a.Value)
 	case AttrTimerVal:
 		value = string(a.Value)
 	case AttrReservationToken:
-		value = string(a.Value)
+		value = fmt.Sprintf("%02x", a.Value)
 	// TURNTCP
 	case AttrConnectionID:
 		value = fmt.Sprintf("%02x", a.Value)

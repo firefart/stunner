@@ -119,8 +119,9 @@ func TestSendRequest(t *testing.T) {
 	if s.Header.MessageType.Method != MsgTypeMethodSend {
 		t.Errorf("method: expected Send, got %v", s.Header.MessageType.Method)
 	}
-	if s.Header.MessageType.Class != MsgTypeClassRequest {
-		t.Errorf("class: expected Request, got %v", s.Header.MessageType.Class)
+	// RFC 5766 §3: Send has indication-only semantics
+	if s.Header.MessageType.Class != MsgTypeClassIndication {
+		t.Errorf("class: expected Indication, got %v", s.Header.MessageType.Class)
 	}
 
 	peerAddr := s.GetAttribute(AttrXorPeerAddress)
