@@ -28,7 +28,7 @@ func fromBytes(data []byte) (*Stun, error) {
 		if expectedPacketSize < len(data) {
 			extraData = data[expectedPacketSize:]
 		}
-		return nil, fmt.Errorf("attribute message size (%d) missmatch to received data (%d). extra data: %x", expectedPacketSize, len(data), extraData)
+		return nil, fmt.Errorf("attribute message size (%d) mismatch to received data (%d). extra data: %x", expectedPacketSize, len(data), extraData)
 	}
 	attributesRaw := data[headerSize:expectedPacketSize]
 	t.Attributes = parseAttributes(attributesRaw)
