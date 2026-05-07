@@ -164,7 +164,7 @@ func (a *Attribute) String(transactionID string) string {
 	case AttrNonce:
 		value = string(a.Value)
 	case AttrRequestedAddressFamily:
-		if len(a.Value) < 1 {
+		if len(a.Value) < 4 {
 			value = "invalid"
 			break
 		}
@@ -285,7 +285,7 @@ const (
 	// AttrNonce https://tools.ietf.org/html/rfc5389#section-15.8
 	AttrNonce AttributeType = 0x0015
 	// https://datatracker.ietf.org/doc/html/rfc6156#section-10.1
-	AttrRequestedAddressFamily = 0x0017
+	AttrRequestedAddressFamily AttributeType = 0x0017
 	// AttrXorMappedAddress https://tools.ietf.org/html/rfc5389#section-15.2
 	AttrXorMappedAddress AttributeType = 0x0020
 	// AttrSoftware https://tools.ietf.org/html/rfc5389#section-15.10
@@ -406,7 +406,7 @@ const (
 	// https://datatracker.ietf.org/doc/html/rfc6156#section-10.2
 	ErrorAddressFamilyNotSupported ErrorCode = 440
 	// https://datatracker.ietf.org/doc/html/rfc6156#section-10.2
-	ErrorPeerAddressFamilyMissmatch ErrorCode = 443
+	ErrorPeerAddressFamilyMismatch ErrorCode = 443
 	// ErrorServerError error
 	/*
 		Server Error: The server has suffered a temporary error.  The
@@ -422,7 +422,7 @@ var StunErrorNames = map[ErrorCode]string{ // nolint:exhaustive
 	ErrorUnauthorized:               "Unauthorized",
 	ErrorUnknownAttribute:           "Unknown Attribute",
 	ErrorStaleNonce:                 "Stale Nonce",
-	ErrorAddressFamilyNotSupported:  "Address Family not supported",
-	ErrorPeerAddressFamilyMissmatch: "Peer Address Family Missmatch",
+	ErrorAddressFamilyNotSupported: "Address Family not Supported",
+	ErrorPeerAddressFamilyMismatch: "Peer Address Family Mismatch",
 	ErrorServerError:                "Server Error",
 }
