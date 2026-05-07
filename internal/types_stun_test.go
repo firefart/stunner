@@ -99,7 +99,7 @@ func TestAttributeStringRequestedAddressFamilyShort(t *testing.T) {
 func TestAttributeStringRequestedTransportShort(t *testing.T) {
 	t.Parallel()
 
-	// Single-byte value must not panic (needs 2 for Uint16)
+	// Single-byte value must not panic (REQUESTED-TRANSPORT requires 4 bytes: 1 protocol byte + 3 reserved)
 	a := Attribute{
 		Type:  AttrRequestedTransport,
 		Value: []byte{0x11},
