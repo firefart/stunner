@@ -100,11 +100,13 @@ func testPassword(ctx context.Context, opts BruteforceOpts, password string) err
 	}
 	// we got an error - log anything other than the expected 401 Unauthorized
 	errAttr := allocateResponse.GetAttribute(internal.AttrErrorCode)
-	if len(errAttr.Value) > 0 {
+	if len(errAttr.Value) >= 4 {
 		parsedErr := internal.ParseError(errAttr.Value)
 		if parsedErr.ErrorCode != internal.ErrorUnauthorized {
 			opts.Log.Errorf("Unknown error: %s", parsedErr.ErrorText)
 		}
+	} else if len(errAttr.Value) > 0 {
+		opts.Log.Errorf("Unknown error: malformed ERROR-CODE attribute: %x", errAttr.Value)
 	}
 	return nil
 }
