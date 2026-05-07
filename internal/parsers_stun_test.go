@@ -38,6 +38,55 @@ func TestFromBytes(t *testing.T) {
 	}
 }
 
+func TestParseAttributesBoundsCheck(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		input    []byte
+		wantLen  int
+	}{
+		{
+			"truncated header (3 bytes, needs 4)",
+			[]byte{0x00, 0x14, 0x00},
+			0,
+		},
+		{
+			"attribute length exceeds buffer",
+			// Type=REALM(0x0014), Length=0x00FF (255), but zero data follows
+			[]byte{0x00, 0x14, 0x00, 0xFF},
+			0,
+		},
+		{
+			"valid single attribute is parsed",
+			// Type=SOFTWARE(0x8022), Length=4, Value="None"
+			[]byte{0x80, 0x22, 0x00, 0x04, 'N', 'o', 'n', 'e'},
+			1,
+		},
+		{
+			"second attribute with bad length is dropped cleanly",
+			// First attr: Type=SOFTWARE(0x8022), Length=4, Value="None" (valid, 8 bytes)
+			// Second attr: Type=REALM(0x0014), Length=0xFF (exceeds remaining data)
+			[]byte{0x80, 0x22, 0x00, 0x04, 'N', 'o', 'n', 'e', 0x00, 0x14, 0x00, 0xFF},
+			1,
+		},
+		{
+			"empty input returns no attributes",
+			[]byte{},
+			0,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			attrs := parseAttributes(tt.input)
+			if len(attrs) != tt.wantLen {
+				t.Errorf("expected %d attribute(s), got %d", tt.wantLen, len(attrs))
+			}
+		})
+	}
+}
+
 func TestFromBytesFail(t *testing.T) {
 	t.Parallel()
 

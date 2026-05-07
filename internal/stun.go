@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"strings"
@@ -11,9 +10,13 @@ import (
 
 // newStun creates a new STUN object
 func newStun() *Stun {
+	b, err := helper.RandomBytes(12)
+	if err != nil {
+		panic(err)
+	}
 	return &Stun{
 		Header: Header{
-			TransactionID: helper.RandomString(12),
+			TransactionID: string(b),
 		},
 	}
 }
@@ -72,8 +75,7 @@ func (s *Stun) Serialize() ([]byte, error) {
 	if authenticated {
 		attributes = append(attributes, helper.PutUint16(AttrMessageIntegrity.Value())...)
 		attributes = append(attributes, helper.PutUint16(messageIntegritySize)...)
-		// dummy data, will be replaced later after calculating the main header
-		attributes = append(attributes, []byte("_DUMMYDATADUMMYDATA_")...)
+		attributes = append(attributes, make([]byte, messageIntegritySize)...)
 	}
 
 	// fingerprintPos := len(attributes)
@@ -102,7 +104,7 @@ func (s *Stun) Serialize() ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		buf = bytes.ReplaceAll(buf, []byte("_DUMMYDATADUMMYDATA_"), messageInt)
+		copy(buf[headerSize+integrityPos+4:headerSize+integrityPos+4+messageIntegritySize], messageInt)
 	}
 
 	// Fingerprint

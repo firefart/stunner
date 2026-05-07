@@ -39,7 +39,7 @@ func xor(content, key []byte) []byte {
 //	        Figure 6: Format of XOR-MAPPED-ADDRESS Attribute
 func xorAddr(ip netip.Addr, port uint16, transactionID []byte) ([]byte, error) {
 	var family uint16
-	var key = MagicCookie
+	key := bytes.Clone(MagicCookie)
 
 	switch {
 	case ip.Is6():
@@ -106,7 +106,7 @@ func ConvertXORAddr(input []byte, transactionID string) (string, uint16, error) 
 	portInt := binary.BigEndian.Uint16(portRaw)
 	port := portInt ^ magicInt
 
-	key := MagicCookie
+	key := bytes.Clone(MagicCookie)
 	switch family[1] {
 	case 0x01:
 		// IPv4, nothing to do

@@ -164,6 +164,10 @@ func (a *Attribute) String(transactionID string) string {
 	case AttrNonce:
 		value = string(a.Value)
 	case AttrRequestedAddressFamily:
+		if len(a.Value) < 1 {
+			value = "invalid"
+			break
+		}
 		value = RequestedAddressFamilyString(AllocateProtocol(a.Value[0]))
 	case AttrXorMappedAddress:
 		host, port, _ := ConvertXORAddr(a.Value, transactionID)
@@ -178,7 +182,11 @@ func (a *Attribute) String(transactionID string) string {
 	case AttrChannelNumber:
 		value = string(a.Value)
 	case AttrLifetime:
-		value = strconv.FormatUint(binary.BigEndian.Uint64(a.Value), 10)
+		if len(a.Value) < 4 {
+			value = "invalid"
+			break
+		}
+		value = strconv.FormatUint(uint64(binary.BigEndian.Uint32(a.Value)), 10)
 	case AttrBandwidth:
 		value = string(a.Value)
 	case AttrXorPeerAddress:
@@ -192,6 +200,10 @@ func (a *Attribute) String(transactionID string) string {
 	case AttrEvenPort:
 		value = string(a.Value)
 	case AttrRequestedTransport:
+		if len(a.Value) < 2 {
+			value = "invalid"
+			break
+		}
 		value = RequestedTransportString(RequestedTransport(binary.LittleEndian.Uint16(a.Value)))
 	case AttrDontFragment:
 		value = string(a.Value)
@@ -314,6 +326,9 @@ type Error struct {
 
 // ParseError returns an Error type from a byte slice
 func ParseError(buf []byte) Error {
+	if len(buf) < 4 {
+		return Error{}
+	}
 	errorCode := int(buf[2])*100 + int(buf[3])
 	errorText := buf[4:]
 	return Error{

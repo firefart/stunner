@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 )
@@ -10,6 +11,14 @@ func fromBytes(data []byte) (*Stun, error) {
 	t := new(Stun)
 	if len(data) < headerSize {
 		return nil, fmt.Errorf("invalid turn packet. Packet Data: %s", string(data))
+	}
+	// RFC 5389 §6: top two bits of the first byte must be zero
+	if data[0]&0xC0 != 0 {
+		return nil, fmt.Errorf("invalid STUN packet: top two bits must be zero, got %02x", data[0])
+	}
+	// RFC 5389 §6: magic cookie must be 0x2112A442
+	if !bytes.Equal(data[4:8], MagicCookie) {
+		return nil, fmt.Errorf("invalid STUN packet: missing magic cookie, got %02x", data[4:8])
 	}
 	headerRaw := data[0:headerSize]
 	t.Header = parseHeader(headerRaw)
@@ -58,27 +67,29 @@ func parseSTUNMessageType(msgType []byte) MessageType {
 
 func parseAttributes(attributes []byte) []Attribute {
 	var attrs []Attribute
-	if len(attributes) == 0 {
-		return attrs
-	}
-	attrsRemaining := true
 	inLength := len(attributes)
-	var bufPos uint16
-	for attrsRemaining {
-		attr := Attribute{}
-		attr.Type = AttributeType(binary.BigEndian.Uint16(attributes[bufPos : 2+bufPos]))
-		bufPos += 2
-		attr.Length = binary.BigEndian.Uint16(attributes[bufPos : 2+bufPos])
-		bufPos += 2
-		attr.Value = attributes[bufPos : attr.Length+bufPos]
-		bufPos += attr.Length
-		// Padding
-		if rem := bufPos % 4; rem != 0 {
-			attr.padding = 4 - rem
-			bufPos += attr.padding
+	bufPos := 0
+	for bufPos < inLength {
+		// Need at least 4 bytes for the type and length fields
+		if bufPos+4 > inLength {
+			break
 		}
-		if int(bufPos) >= inLength {
-			attrsRemaining = false
+		attr := Attribute{}
+		attr.Type = AttributeType(binary.BigEndian.Uint16(attributes[bufPos : bufPos+2]))
+		bufPos += 2
+		attr.Length = binary.BigEndian.Uint16(attributes[bufPos : bufPos+2])
+		bufPos += 2
+		end := bufPos + int(attr.Length)
+		if end > inLength {
+			break
+		}
+		attr.Value = attributes[bufPos:end]
+		bufPos = end
+		// Padding to 4-byte boundary
+		if rem := bufPos % 4; rem != 0 {
+			padding := 4 - rem
+			attr.padding = uint16(padding) // nolint:gosec
+			bufPos += padding
 		}
 		attrs = append(attrs, attr)
 	}

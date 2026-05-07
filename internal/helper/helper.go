@@ -32,6 +32,15 @@ func RandomString(length int) string {
 	return string(b)
 }
 
+// RandomBytes generates n cryptographically random bytes
+func RandomBytes(n int) ([]byte, error) {
+	b := make([]byte, n)
+	if _, err := cryptorand.Read(b); err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
 func IsPrivateIP(ip netip.Addr) bool {
 	if ip.IsGlobalUnicast() || ip.IsInterfaceLocalMulticast() ||
 		ip.IsLinkLocalMulticast() || ip.IsLinkLocalUnicast() ||
