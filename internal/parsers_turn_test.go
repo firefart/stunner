@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -60,7 +61,7 @@ func TestExtractChannelData(t *testing.T) {
 				if err == nil {
 					t.Fatalf("expected error containing %q, got nil", tt.wantErrSubstr)
 				}
-				if !bytes.Contains([]byte(err.Error()), []byte(tt.wantErrSubstr)) {
+				if !strings.Contains(err.Error(), tt.wantErrSubstr) {
 					t.Errorf("expected error %q to contain %q", err.Error(), tt.wantErrSubstr)
 				}
 				return

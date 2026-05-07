@@ -42,9 +42,9 @@ func TestParseAttributesBoundsCheck(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name     string
-		input    []byte
-		wantLen  int
+		name    string
+		input   []byte
+		wantLen int
 	}{
 		{
 			"truncated header (3 bytes, needs 4)",

@@ -417,12 +417,12 @@ const (
 
 // nolint:unused
 var StunErrorNames = map[ErrorCode]string{ // nolint:exhaustive
-	ErrorTryAlternate:               "Try Alternate",
-	ErrorBadRequest:                 "Bad Request",
-	ErrorUnauthorized:               "Unauthorized",
-	ErrorUnknownAttribute:           "Unknown Attribute",
-	ErrorStaleNonce:                 "Stale Nonce",
+	ErrorTryAlternate:              "Try Alternate",
+	ErrorBadRequest:                "Bad Request",
+	ErrorUnauthorized:              "Unauthorized",
+	ErrorUnknownAttribute:          "Unknown Attribute",
+	ErrorStaleNonce:                "Stale Nonce",
 	ErrorAddressFamilyNotSupported: "Address Family not Supported",
 	ErrorPeerAddressFamilyMismatch: "Peer Address Family Mismatch",
-	ErrorServerError:                "Server Error",
+	ErrorServerError:               "Server Error",
 }
