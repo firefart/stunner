@@ -10,9 +10,13 @@ import (
 
 // newStun creates a new STUN object
 func newStun() *Stun {
-	b, err := helper.RandomBytes(12)
-	if err != nil {
-		panic(err)
+	return newStunWithRandom(helper.RandomBytes)
+}
+
+func newStunWithRandom(randomBytes func(int) ([]byte, error)) *Stun {
+	b, err := randomBytes(12)
+	if err != nil || len(b) != 12 {
+		b = make([]byte, 12)
 	}
 	return &Stun{
 		Header: Header{

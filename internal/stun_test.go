@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 	"testing"
 )
@@ -130,6 +131,34 @@ func TestStunSerializeMissingTransactionID(t *testing.T) {
 	_, err := s.Serialize()
 	if err == nil {
 		t.Error("expected error when TransactionID is empty")
+	}
+}
+
+func TestNewStunWithRandomFailureFallback(t *testing.T) {
+	t.Parallel()
+
+	s := newStunWithRandom(func(int) ([]byte, error) {
+		return nil, errors.New("entropy source unavailable")
+	})
+	if len(s.Header.TransactionID) != 12 {
+		t.Fatalf("expected transaction ID length 12, got %d", len(s.Header.TransactionID))
+	}
+	if !bytes.Equal([]byte(s.Header.TransactionID), make([]byte, 12)) {
+		t.Errorf("expected zeroed transaction ID fallback, got %x", []byte(s.Header.TransactionID))
+	}
+}
+
+func TestNewStunWithRandomInvalidLengthFallback(t *testing.T) {
+	t.Parallel()
+
+	s := newStunWithRandom(func(int) ([]byte, error) {
+		return []byte{0x01, 0x02}, nil
+	})
+	if len(s.Header.TransactionID) != 12 {
+		t.Fatalf("expected transaction ID length 12, got %d", len(s.Header.TransactionID))
+	}
+	if !bytes.Equal([]byte(s.Header.TransactionID), make([]byte, 12)) {
+		t.Errorf("expected zeroed transaction ID fallback, got %x", []byte(s.Header.TransactionID))
 	}
 }
 
