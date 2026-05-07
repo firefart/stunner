@@ -143,9 +143,11 @@ func SetupTurnConnection(ctx context.Context, logger DebugLogger, connectProtoco
 	allocateRequest := AllocateRequest(RequestedTransportUDP, addressFamily)
 	allocateResponse, err := allocateRequest.SendAndReceive(ctx, logger, remote, timeout)
 	if err != nil {
+		remote.Close()
 		return nil, "", "", fmt.Errorf("error on sending AllocateRequest: %w", err)
 	}
 	if allocateResponse.Header.MessageType.Class != MsgTypeClassError {
+		remote.Close()
 		return nil, "", "", errors.New("MessageClass is not Error (should be not authenticated)")
 	}
 
@@ -155,20 +157,25 @@ func SetupTurnConnection(ctx context.Context, logger DebugLogger, connectProtoco
 	allocateRequest = AllocateRequestAuth(username, password, nonce, realm, RequestedTransportUDP, addressFamily)
 	allocateResponse, err = allocateRequest.SendAndReceive(ctx, logger, remote, timeout)
 	if err != nil {
+		remote.Close()
 		return nil, "", "", fmt.Errorf("error on sending AllocateRequest Auth: %w", err)
 	}
 	if allocateResponse.Header.MessageType.Class == MsgTypeClassError {
+		remote.Close()
 		return nil, "", "", fmt.Errorf("error on AllocateRequest Auth: %s", allocateResponse.GetErrorString())
 	}
 	permissionRequest, err := CreatePermissionRequest(username, password, nonce, realm, targetHost, targetPort)
 	if err != nil {
+		remote.Close()
 		return nil, "", "", fmt.Errorf("error on generating CreatePermissionRequest: %w", err)
 	}
 	permissionResponse, err := permissionRequest.SendAndReceive(ctx, logger, remote, timeout)
 	if err != nil {
+		remote.Close()
 		return nil, "", "", fmt.Errorf("error on sending CreatePermissionRequest: %w", err)
 	}
 	if permissionResponse.Header.MessageType.Class == MsgTypeClassError {
+		remote.Close()
 		return nil, "", "", fmt.Errorf("error on CreatePermission: %s", permissionResponse.GetErrorString())
 	}
 
