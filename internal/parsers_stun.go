@@ -10,7 +10,7 @@ import (
 func fromBytes(data []byte) (*Stun, error) {
 	t := new(Stun)
 	if len(data) < headerSize {
-		return nil, fmt.Errorf("invalid turn packet. Packet Data: %s", string(data))
+		return nil, fmt.Errorf("invalid STUN packet: packet data: %x", data)
 	}
 	// RFC 5389 §6: top two bits of the first byte must be zero
 	if data[0]&0xC0 != 0 {
@@ -24,11 +24,11 @@ func fromBytes(data []byte) (*Stun, error) {
 	t.Header = parseHeader(headerRaw)
 	expectedPacketSize := int(t.Header.MessageLength) + headerSize
 	if expectedPacketSize != len(data) {
-		extraData := ""
+		extraData := []byte{}
 		if expectedPacketSize < len(data) {
-			extraData = string(data[expectedPacketSize:])
+			extraData = data[expectedPacketSize:]
 		}
-		return nil, fmt.Errorf("attribute message size (%d) missmatch to received data (%d). extra data: %s", expectedPacketSize, len(data), extraData)
+		return nil, fmt.Errorf("attribute message size (%d) missmatch to received data (%d). extra data: %x", expectedPacketSize, len(data), extraData)
 	}
 	attributesRaw := data[headerSize:expectedPacketSize]
 	t.Attributes = parseAttributes(attributesRaw)
