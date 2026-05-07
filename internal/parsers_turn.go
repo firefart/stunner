@@ -19,5 +19,14 @@ func ExtractChannelData(buf []byte) ([]byte, []byte, error) {
 	if int(dataLength) > len(data) {
 		return nil, nil, fmt.Errorf("reported len %d greater than available data %d", dataLength, len(data))
 	}
+
+	paddingLen := len(data) - int(dataLength)
+	if paddingLen > 3 {
+		return nil, nil, fmt.Errorf("invalid ChannelData padding length %d", paddingLen)
+	}
+	if len(buf)%4 != 0 {
+		return nil, nil, fmt.Errorf("invalid ChannelData size %d: not 4-byte aligned", len(buf))
+	}
+
 	return channelNumber, data[:dataLength], nil
 }
