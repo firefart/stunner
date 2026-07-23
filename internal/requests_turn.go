@@ -84,8 +84,9 @@ func SendRequest(target netip.Addr, port uint16) (*Stun, error) {
 		return nil, err
 	}
 
+	// RFC 5766 §3: Send has indication-only semantics
 	s.Header.MessageType = MessageType{
-		Class:  MsgTypeClassRequest,
+		Class:  MsgTypeClassIndication,
 		Method: MsgTypeMethodSend,
 	}
 
