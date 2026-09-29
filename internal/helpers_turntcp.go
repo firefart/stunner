@@ -44,9 +44,11 @@ func SetupTurnTCPConnection(ctx context.Context, logger DebugLogger, turnServer 
 	allocateRequest := AllocateRequest(RequestedTransportTCP, addressFamily)
 	allocateResponse, err := allocateRequest.SendAndReceive(ctx, logger, controlConnection, timeout)
 	if err != nil {
+		controlConnection.Close()
 		return "", "", nil, nil, fmt.Errorf("error on sending allocate request 1: %w", err)
 	}
 	if allocateResponse.Header.MessageType.Class != MsgTypeClassError {
+		controlConnection.Close()
 		return "", "", nil, nil, errors.New("MessageClass is not Error (should be not authenticated)")
 	}
 
@@ -56,28 +58,39 @@ func SetupTurnTCPConnection(ctx context.Context, logger DebugLogger, turnServer 
 	allocateRequest = AllocateRequestAuth(username, password, nonce, realm, RequestedTransportTCP, addressFamily)
 	allocateResponse, err = allocateRequest.SendAndReceive(ctx, logger, controlConnection, timeout)
 	if err != nil {
+		controlConnection.Close()
 		return "", "", nil, nil, fmt.Errorf("error on sending allocate request 2: %w", err)
 	}
 	if allocateResponse.Header.MessageType.Class == MsgTypeClassError {
+		controlConnection.Close()
 		return "", "", nil, nil, fmt.Errorf("error on allocate response: %s", allocateResponse.GetErrorString())
 	}
 
 	connectRequest, err := ConnectRequestAuth(username, password, nonce, realm, targetHost, targetPort)
 	if err != nil {
+		controlConnection.Close()
 		return "", "", nil, nil, fmt.Errorf("error on generating Connect request: %w", err)
 	}
 	connectResponse, err := connectRequest.SendAndReceive(ctx, logger, controlConnection, timeout)
 	if err != nil {
+		controlConnection.Close()
 		return "", "", nil, nil, fmt.Errorf("error on sending Connect request: %w", err)
 	}
 	if connectResponse.Header.MessageType.Class == MsgTypeClassError {
+		controlConnection.Close()
 		return "", "", nil, nil, fmt.Errorf("error on Connect response: %s", connectResponse.GetErrorString())
 	}
 
+	// RFC 6062 §6.2.1: CONNECTION-ID is a 32-bit unsigned integer (exactly 4 bytes).
 	connectionID := connectResponse.GetAttribute(AttrConnectionID).Value
+	if len(connectionID) != 4 {
+		controlConnection.Close()
+		return "", "", nil, nil, fmt.Errorf("Connect response missing or invalid CONNECTION-ID: got %d bytes", len(connectionID))
+	}
 
 	dataConnection, err := Connect(ctx, "tcp", turnServer, useTLS, timeout)
 	if err != nil {
+		controlConnection.Close()
 		return "", "", nil, nil, fmt.Errorf("error on establishing data connection: %w", err)
 	}
 
@@ -91,10 +104,14 @@ func SetupTurnTCPConnection(ctx context.Context, logger DebugLogger, turnServer 
 	connectionBindRequest := ConnectionBindRequest(connectionID, username, password, nonce, realm)
 	connectionBindResponse, err := connectionBindRequest.SendAndReceive(ctx, logger, dataConnection, timeout)
 	if err != nil {
+		controlConnection.Close()
+		dataConnection.Close()
 		return "", "", nil, nil, fmt.Errorf("error on sending ConnectionBind request: %w", err)
 	}
 	if connectionBindResponse.Header.MessageType.Class == MsgTypeClassError {
-		return "", "", nil, nil, fmt.Errorf("error on ConnectionBind reposnse: %s", connectionBindResponse.GetErrorString())
+		controlConnection.Close()
+		dataConnection.Close()
+		return "", "", nil, nil, fmt.Errorf("error on ConnectionBind response: %s", connectionBindResponse.GetErrorString())
 	}
 
 	return realm, nonce, controlConnection, dataConnection, nil

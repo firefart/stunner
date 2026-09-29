@@ -74,6 +74,7 @@ func testPassword(ctx context.Context, opts BruteforceOpts, password string) err
 	if err != nil {
 		return err
 	}
+	defer remote.Close()
 
 	addressFamily := internal.AllocateProtocolIgnore
 	allocateRequest := internal.AllocateRequest(internal.RequestedTransportUDP, addressFamily)
@@ -97,11 +98,15 @@ func testPassword(ctx context.Context, opts BruteforceOpts, password string) err
 		opts.Log.Infof("Found valid credentials: %s:%s", opts.Username, password)
 		return nil
 	}
-	// we got an error
-	errorCode := allocateResponse.GetAttribute(internal.AttrErrorCode).Value[4:]
-	if string(errorCode) != "Unauthorized" {
-		// get all other errors than auth errors
-		opts.Log.Errorf("Unknown error: %s", string(errorCode))
+	// we got an error - log anything other than the expected 401 Unauthorized
+	errAttr := allocateResponse.GetAttribute(internal.AttrErrorCode)
+	if len(errAttr.Value) >= 4 {
+		parsedErr := internal.ParseError(errAttr.Value)
+		if parsedErr.ErrorCode != internal.ErrorUnauthorized {
+			opts.Log.Errorf("Unknown error: %s", parsedErr.ErrorText)
+		}
+	} else if len(errAttr.Value) > 0 {
+		opts.Log.Errorf("Unknown error: malformed ERROR-CODE attribute: %x", errAttr.Value)
 	}
 	return nil
 }
