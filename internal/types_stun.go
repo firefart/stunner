@@ -164,6 +164,10 @@ func (a *Attribute) String(transactionID string) string {
 	case AttrNonce:
 		value = string(a.Value)
 	case AttrRequestedAddressFamily:
+		if len(a.Value) < 4 {
+			value = "invalid"
+			break
+		}
 		value = RequestedAddressFamilyString(AllocateProtocol(a.Value[0]))
 	case AttrXorMappedAddress:
 		host, port, _ := ConvertXORAddr(a.Value, transactionID)
@@ -176,9 +180,18 @@ func (a *Attribute) String(transactionID string) string {
 		value = fmt.Sprintf("%02x", a.Value)
 	// TURN
 	case AttrChannelNumber:
-		value = string(a.Value)
+		if len(a.Value) < 2 {
+			value = "invalid"
+			break
+		}
+		chanNum := binary.BigEndian.Uint16(a.Value[:2])
+		value = fmt.Sprintf("0x%04x", chanNum)
 	case AttrLifetime:
-		value = strconv.FormatUint(binary.BigEndian.Uint64(a.Value), 10)
+		if len(a.Value) < 4 {
+			value = "invalid"
+			break
+		}
+		value = strconv.FormatUint(uint64(binary.BigEndian.Uint32(a.Value)), 10)
 	case AttrBandwidth:
 		value = string(a.Value)
 	case AttrXorPeerAddress:
@@ -190,15 +203,29 @@ func (a *Attribute) String(transactionID string) string {
 		host, port, _ := ConvertXORAddr(a.Value, transactionID)
 		value = fmt.Sprintf("%02x (%s:%d)", a.Value, host, port)
 	case AttrEvenPort:
-		value = string(a.Value)
+		if len(a.Value) < 1 {
+			value = "invalid"
+			break
+		}
+		// RFC 5766 §14.6: R bit (MSB of first byte) requests reservation of next port
+		if a.Value[0]&0x80 != 0 {
+			value = "R=1"
+		} else {
+			value = "R=0"
+		}
 	case AttrRequestedTransport:
-		value = RequestedTransportString(RequestedTransport(binary.LittleEndian.Uint16(a.Value)))
+		// RFC 5766 §14.7: first byte is protocol; remaining 3 bytes are reserved
+		if len(a.Value) < 4 {
+			value = "invalid"
+			break
+		}
+		value = RequestedTransportString(RequestedTransport(a.Value[0]))
 	case AttrDontFragment:
 		value = string(a.Value)
 	case AttrTimerVal:
 		value = string(a.Value)
 	case AttrReservationToken:
-		value = string(a.Value)
+		value = fmt.Sprintf("%02x", a.Value)
 	// TURNTCP
 	case AttrConnectionID:
 		value = fmt.Sprintf("%02x", a.Value)
@@ -258,7 +285,7 @@ const (
 	// AttrNonce https://tools.ietf.org/html/rfc5389#section-15.8
 	AttrNonce AttributeType = 0x0015
 	// https://datatracker.ietf.org/doc/html/rfc6156#section-10.1
-	AttrRequestedAddressFamily = 0x0017
+	AttrRequestedAddressFamily AttributeType = 0x0017
 	// AttrXorMappedAddress https://tools.ietf.org/html/rfc5389#section-15.2
 	AttrXorMappedAddress AttributeType = 0x0020
 	// AttrSoftware https://tools.ietf.org/html/rfc5389#section-15.10
@@ -314,6 +341,9 @@ type Error struct {
 
 // ParseError returns an Error type from a byte slice
 func ParseError(buf []byte) Error {
+	if len(buf) < 4 {
+		return Error{}
+	}
 	errorCode := int(buf[2])*100 + int(buf[3])
 	errorText := buf[4:]
 	return Error{
@@ -376,7 +406,7 @@ const (
 	// https://datatracker.ietf.org/doc/html/rfc6156#section-10.2
 	ErrorAddressFamilyNotSupported ErrorCode = 440
 	// https://datatracker.ietf.org/doc/html/rfc6156#section-10.2
-	ErrorPeerAddressFamilyMissmatch ErrorCode = 443
+	ErrorPeerAddressFamilyMismatch ErrorCode = 443
 	// ErrorServerError error
 	/*
 		Server Error: The server has suffered a temporary error.  The
@@ -387,12 +417,12 @@ const (
 
 // nolint:unused
 var StunErrorNames = map[ErrorCode]string{ // nolint:exhaustive
-	ErrorTryAlternate:               "Try Alternate",
-	ErrorBadRequest:                 "Bad Request",
-	ErrorUnauthorized:               "Unauthorized",
-	ErrorUnknownAttribute:           "Unknown Attribute",
-	ErrorStaleNonce:                 "Stale Nonce",
-	ErrorAddressFamilyNotSupported:  "Address Family not supported",
-	ErrorPeerAddressFamilyMissmatch: "Peer Address Family Missmatch",
-	ErrorServerError:                "Server Error",
+	ErrorTryAlternate:              "Try Alternate",
+	ErrorBadRequest:                "Bad Request",
+	ErrorUnauthorized:              "Unauthorized",
+	ErrorUnknownAttribute:          "Unknown Attribute",
+	ErrorStaleNonce:                "Stale Nonce",
+	ErrorAddressFamilyNotSupported: "Address Family not Supported",
+	ErrorPeerAddressFamilyMismatch: "Peer Address Family Mismatch",
+	ErrorServerError:               "Server Error",
 }
