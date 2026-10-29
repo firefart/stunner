@@ -39,7 +39,7 @@ func xor(content, key []byte) []byte {
 //	        Figure 6: Format of XOR-MAPPED-ADDRESS Attribute
 func xorAddr(ip netip.Addr, port uint16, transactionID []byte) ([]byte, error) {
 	var family uint16
-	var key = MagicCookie
+	key := bytes.Clone(MagicCookie)
 
 	switch {
 	case ip.Is6():
@@ -106,7 +106,7 @@ func ConvertXORAddr(input []byte, transactionID string) (string, uint16, error) 
 	portInt := binary.BigEndian.Uint16(portRaw)
 	port := portInt ^ magicInt
 
-	key := MagicCookie
+	key := bytes.Clone(MagicCookie)
 	switch family[1] {
 	case 0x01:
 		// IPv4, nothing to do
@@ -143,9 +143,11 @@ func SetupTurnConnection(ctx context.Context, logger DebugLogger, connectProtoco
 	allocateRequest := AllocateRequest(RequestedTransportUDP, addressFamily)
 	allocateResponse, err := allocateRequest.SendAndReceive(ctx, logger, remote, timeout)
 	if err != nil {
+		remote.Close()
 		return nil, "", "", fmt.Errorf("error on sending AllocateRequest: %w", err)
 	}
 	if allocateResponse.Header.MessageType.Class != MsgTypeClassError {
+		remote.Close()
 		return nil, "", "", errors.New("MessageClass is not Error (should be not authenticated)")
 	}
 
@@ -155,20 +157,25 @@ func SetupTurnConnection(ctx context.Context, logger DebugLogger, connectProtoco
 	allocateRequest = AllocateRequestAuth(username, password, nonce, realm, RequestedTransportUDP, addressFamily)
 	allocateResponse, err = allocateRequest.SendAndReceive(ctx, logger, remote, timeout)
 	if err != nil {
+		remote.Close()
 		return nil, "", "", fmt.Errorf("error on sending AllocateRequest Auth: %w", err)
 	}
 	if allocateResponse.Header.MessageType.Class == MsgTypeClassError {
+		remote.Close()
 		return nil, "", "", fmt.Errorf("error on AllocateRequest Auth: %s", allocateResponse.GetErrorString())
 	}
 	permissionRequest, err := CreatePermissionRequest(username, password, nonce, realm, targetHost, targetPort)
 	if err != nil {
+		remote.Close()
 		return nil, "", "", fmt.Errorf("error on generating CreatePermissionRequest: %w", err)
 	}
 	permissionResponse, err := permissionRequest.SendAndReceive(ctx, logger, remote, timeout)
 	if err != nil {
+		remote.Close()
 		return nil, "", "", fmt.Errorf("error on sending CreatePermissionRequest: %w", err)
 	}
 	if permissionResponse.Header.MessageType.Class == MsgTypeClassError {
+		remote.Close()
 		return nil, "", "", fmt.Errorf("error on CreatePermission: %s", permissionResponse.GetErrorString())
 	}
 
